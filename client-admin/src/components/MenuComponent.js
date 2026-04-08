@@ -11,7 +11,7 @@ class MenuComponent extends Component {
     const currentPort = window.location.port;
     const customerPort = currentPort === "3000" ? "3001" : "3000";
 
-    window.location.href = `http://localhost:${customerPort}/home`;
+    window.location.href = "https://dingzcustomer.onrender.com/home";
   };
 
   render() {
