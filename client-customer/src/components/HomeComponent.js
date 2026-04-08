@@ -55,7 +55,7 @@ class HomeComponent extends Component {
 
   apiGetNewProducts() {
     axios
-      .get("http://127.0.0.1:5000/api/products/new")
+      .get("https://dingzcomputer.onrender.com/api/products/new")
       .then((res) =>
         this.setState({
           products: res.data,
@@ -69,20 +69,20 @@ class HomeComponent extends Component {
 
   apiGetCategories() {
     axios
-      .get("http://127.0.0.1:5000/api/categories")
+      .get("https://dingzcomputer.onrender.com/api/categories")
       .then((res) => this.setState({ categories: res.data }))
       .catch((err) => console.log(err.message));
   }
 
   apiGetBrands() {
     axios
-      .get("http://127.0.0.1:5000/api/products/brands")
+      .get("https://dingzcomputer.onrender.com/api/products/brands")
       .then((res) => this.setState({ brands: res.data }))
       .catch((err) => console.log(err.message));
   }
 
   handleFilter = (cid, brand) => {
-    let url = `http://127.0.0.1:5000/api/products?keyword=`;
+    let url = `https://dingzcomputer.onrender.com/api/products?keyword=`;
     if (cid) url += `&category=${cid}`;
     if (brand) url += `&brand=${brand}`;
 

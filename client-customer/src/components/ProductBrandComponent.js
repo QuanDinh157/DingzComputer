@@ -9,17 +9,17 @@ const ProductBrandComponent = () => {
   const [brands, setBrands] = useState([]);
 
   useEffect(() => {
-    let url = "http://127.0.0.1:5000/api/products";
+    let url = "https://dingzcomputer.onrender.com/api/products";
     if (brand) url += `?brand=${brand}`;
     if (cid) url += `?category=${cid}`;
 
     axios.get(url).then((res) => setProducts(res.data));
 
     axios
-      .get("http://127.0.0.1:5000/api/categories")
+      .get("https://dingzcomputer.onrender.com/api/categories")
       .then((res) => setCategories(res.data));
     axios
-      .get("http://127.0.0.1:5000/api/products/brands")
+      .get("https://dingzcomputer.onrender.com/api/products/brands")
       .then((res) => setBrands(res.data));
   }, [brand, cid]);
 

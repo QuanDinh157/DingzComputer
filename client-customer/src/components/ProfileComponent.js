@@ -37,7 +37,7 @@ class ProfileComponent extends Component {
     };
 
     axios
-      .get("http://127.0.0.1:5000/api/users/profile", config)
+      .get("https://dingzcomputer.onrender.com/api/users/profile", config)
       .then((res) => {
         const userData = res.data.user || res.data;
         const { name, phone, address, email } = userData;
@@ -76,7 +76,11 @@ class ProfileComponent extends Component {
     if (password) updateData.password = password;
 
     axios
-      .put("http://127.0.0.1:5000/api/users/profile", updateData, config)
+      .put(
+        "https://dingzcomputer.onrender.com/api/users/profile",
+        updateData,
+        config,
+      )
       .then((res) => {
         Swal.fire("THÀNH CÔNG", "Hồ sơ đã được cập nhật!", "success");
 

@@ -23,13 +23,13 @@ class LoginComponent extends Component {
       const body = { username: txtUsername, password: txtPassword };
 
       axios
-        .post("http://127.0.0.1:5000/api/users/login", body)
+        .post("https://dingzcomputer.onrender.com/api/users/login", body)
         .then((res) => {
           this.handleSuccessLogin(res.data, "customer");
         })
         .catch((errCustomer) => {
           axios
-            .post("http://127.0.0.1:5000/api/admin/login", body)
+            .post("https://dingzcomputer.onrender.com/api/admin/login", body)
             .then((resAdmin) => {
               this.handleSuccessLogin(resAdmin.data, "admin");
             })

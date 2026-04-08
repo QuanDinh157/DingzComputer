@@ -25,7 +25,7 @@ class ProductDetailComponent extends Component {
 
   apiGetProduct(id) {
     axios
-      .get("http://127.0.0.1:5000/api/products/" + id)
+      .get("https://dingzcomputer.onrender.com/api/products/" + id)
       .then((res) => {
         this.setState({ product: res.data, loading: false });
       })

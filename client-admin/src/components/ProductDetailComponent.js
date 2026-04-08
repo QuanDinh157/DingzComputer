@@ -19,9 +19,11 @@ class ProductDetailComponent extends Component {
 
   componentDidMount() {
     // Sửa lại 127.0.0.1 cho đồng bộ an toàn
-    axios.get("http://127.0.0.1:5000/api/categories").then((res) => {
-      this.setState({ categories: res.data });
-    });
+    axios
+      .get("https://dingzcomputer.onrender.com/api/categories")
+      .then((res) => {
+        this.setState({ categories: res.data });
+      });
   }
 
   componentDidUpdate(prevProps) {
@@ -67,17 +69,22 @@ class ProductDetailComponent extends Component {
 
     if (this.state.txtID) {
       axios
-        .put(`http://127.0.0.1:5000/api/products/${this.state.txtID}`, product)
+        .put(
+          `https://dingzcomputer.onrender.com/api/products/${this.state.txtID}`,
+          product,
+        )
         .then(() => {
           alert("Cập nhật thành công!");
           this.props.updateProducts();
         });
     } else {
-      axios.post(`http://127.0.0.1:5000/api/products`, product).then(() => {
-        alert("Thêm mới thành công!");
-        this.props.updateProducts();
-        this.clearForm();
-      });
+      axios
+        .post(`https://dingzcomputer.onrender.com/api/products`, product)
+        .then(() => {
+          alert("Thêm mới thành công!");
+          this.props.updateProducts();
+          this.clearForm();
+        });
     }
   };
 
@@ -86,7 +93,9 @@ class ProductDetailComponent extends Component {
     if (window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
       if (this.state.txtID) {
         axios
-          .delete(`http://127.0.0.1:5000/api/products/${this.state.txtID}`)
+          .delete(
+            `https://dingzcomputer.onrender.com/api/products/${this.state.txtID}`,
+          )
           .then(() => {
             alert("Đã xóa thành công!");
             this.props.updateProducts();
