@@ -33,7 +33,7 @@ class MenuComponent extends Component {
   btnSearchClick = (e) => {
     e.preventDefault();
     if (this.state.txtKeyword.trim()) {
-      window.location.href = "/product/search/" + this.state.txtKeyword;
+      window.location.href = "/home?keyword=" + this.state.txtKeyword;
     }
   };
 

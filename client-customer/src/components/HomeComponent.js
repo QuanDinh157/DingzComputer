@@ -22,16 +22,27 @@ class HomeComponent extends Component {
       currentBannerIndex: 0,
       filterCid: null,
       filterBrand: null,
+      filterMinPrice: null,
+      filterMaxPrice: null,
       isFiltering: false,
     };
     this.bannerTimer = null;
   }
 
   componentDidMount() {
-    this.apiGetNewProducts();
     this.apiGetCategories();
     this.apiGetBrands();
     this.startBannerTimer();
+
+    // Bắt cái từ khóa Search trên thanh URL (nếu có)
+    const params = new URLSearchParams(window.location.search);
+    const keyword = params.get("keyword");
+
+    if (keyword) {
+      this.apiSearchProducts(keyword);
+    } else {
+      this.apiGetNewProducts();
+    }
   }
 
   componentWillUnmount() {
@@ -53,6 +64,20 @@ class HomeComponent extends Component {
     this.startBannerTimer();
   };
 
+  // Hàm mới để xử lý Search riêng
+  apiSearchProducts(keyword) {
+    axios
+      .get(`https://dingzcomputer.onrender.com/api/products?keyword=${keyword}`)
+      .then((res) => {
+        this.setState({
+          products: res.data,
+          isFiltering: true,
+        });
+        window.scrollTo({ top: 650, behavior: "smooth" });
+      })
+      .catch((err) => console.log(err.message));
+  }
+
   apiGetNewProducts() {
     axios
       .get("https://dingzcomputer.onrender.com/api/products/new")
@@ -62,6 +87,8 @@ class HomeComponent extends Component {
           isFiltering: false,
           filterCid: null,
           filterBrand: null,
+          filterMinPrice: null,
+          filterMaxPrice: null,
         }),
       )
       .catch((err) => console.log(err.message));
@@ -81,25 +108,37 @@ class HomeComponent extends Component {
       .catch((err) => console.log(err.message));
   }
 
-  handleFilter = (cid, brand) => {
-    let url = `https://dingzcomputer.onrender.com/api/products?keyword=`;
-    if (cid) url += `&category=${cid}`;
-    if (brand) url += `&brand=${brand}`;
+  // Siêu hàm lọc: Kết hợp Danh mục + Thương hiệu + Giá
+  applyFilters = (cid, brand, minPrice, maxPrice) => {
+    let url = `https://dingzcomputer.onrender.com/api/products?`;
+    const params = new URLSearchParams();
+
+    // Giữ lại keyword search nếu đang search
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get("keyword");
+    if (keyword) params.append("keyword", keyword);
+
+    if (cid) params.append("category", cid);
+    if (brand) params.append("brand", brand);
+    if (minPrice) params.append("minPrice", minPrice);
+    if (maxPrice) params.append("maxPrice", maxPrice);
 
     axios
-      .get(url)
+      .get(url + params.toString())
       .then((res) => {
         this.setState({
           products: res.data,
           filterCid: cid,
           filterBrand: brand,
+          filterMinPrice: minPrice,
+          filterMaxPrice: maxPrice,
           isFiltering: true,
         });
         window.scrollTo({ top: 650, behavior: "smooth" });
       })
       .catch((err) => {
         console.error(err);
-        alert("Danh mục này đang cập nhật data hoặc ID chưa khớp!");
+        alert("Có lỗi khi lọc dữ liệu!");
       });
   };
 
@@ -145,8 +184,14 @@ class HomeComponent extends Component {
       brands,
       filterCid,
       filterBrand,
+      filterMinPrice,
+      filterMaxPrice,
       isFiltering,
     } = this.state;
+
+    // Xác định đang chọn mức giá nào để làm nổi bật (CSS active)
+    const isPriceActive = (min, max) =>
+      filterMinPrice === min && filterMaxPrice === max;
 
     return (
       <div className="home-container">
@@ -173,7 +218,9 @@ class HomeComponent extends Component {
                   <div
                     key={index}
                     onClick={() => this.setCurrentBanner(index)}
-                    className={`dot ${currentBannerIndex === index ? "active" : ""}`}
+                    className={`dot ${
+                      currentBannerIndex === index ? "active" : ""
+                    }`}
                   />
                 ))}
               </div>
@@ -183,7 +230,12 @@ class HomeComponent extends Component {
               <div
                 className="sub-banner-item"
                 onClick={() =>
-                  this.handleFilter("69cf7490900d882519ec3a09", null)
+                  this.applyFilters(
+                    "69cf7490900d882519ec3a09",
+                    null,
+                    null,
+                    null,
+                  )
                 }
               >
                 <div className="sub-banner-overlay">
@@ -197,7 +249,12 @@ class HomeComponent extends Component {
               <div
                 className="sub-banner-item"
                 onClick={() =>
-                  this.handleFilter("69d4aaccffea1abc29192eba6", null)
+                  this.applyFilters(
+                    "69d4aaccffea1abc29192eba6",
+                    null,
+                    null,
+                    null,
+                  )
                 }
               >
                 <div className="sub-banner-overlay">
@@ -211,7 +268,12 @@ class HomeComponent extends Component {
               <div
                 className="sub-banner-item"
                 onClick={() =>
-                  this.handleFilter("69cf7490900d882519ec3a13", null)
+                  this.applyFilters(
+                    "69cf7490900d882519ec3a13",
+                    null,
+                    null,
+                    null,
+                  )
                 }
               >
                 <div className="sub-banner-overlay">
@@ -231,8 +293,14 @@ class HomeComponent extends Component {
             <ul className="category-list">
               <li>
                 <div
-                  onClick={() => this.apiGetNewProducts()}
-                  className={`category-item ${!isFiltering ? "active-filter" : ""}`}
+                  onClick={() => {
+                    // Xóa query trên URL khi bấm Tất cả sản phẩm
+                    window.history.pushState({}, "", "/home");
+                    this.apiGetNewProducts();
+                  }}
+                  className={`category-item ${
+                    !isFiltering ? "active-filter" : ""
+                  }`}
                 >
                   Tất cả sản phẩm
                 </div>
@@ -240,8 +308,17 @@ class HomeComponent extends Component {
               {categories.map((item) => (
                 <li key={item._id}>
                   <div
-                    onClick={() => this.handleFilter(item._id, filterBrand)}
-                    className={`category-item ${filterCid === item._id ? "active-filter" : ""}`}
+                    onClick={() =>
+                      this.applyFilters(
+                        item._id,
+                        filterBrand,
+                        filterMinPrice,
+                        filterMaxPrice,
+                      )
+                    }
+                    className={`category-item ${
+                      filterCid === item._id ? "active-filter" : ""
+                    }`}
                   >
                     {item.name}
                   </div>
@@ -256,19 +333,85 @@ class HomeComponent extends Component {
               {brands.map((b, index) => (
                 <li key={index}>
                   <div
-                    onClick={() => this.handleFilter(filterCid, b)}
-                    className={`category-item ${filterBrand === b ? "active-filter" : ""}`}
+                    onClick={() =>
+                      this.applyFilters(
+                        filterCid,
+                        b,
+                        filterMinPrice,
+                        filterMaxPrice,
+                      )
+                    }
+                    className={`category-item ${
+                      filterBrand === b ? "active-filter" : ""
+                    }`}
                   >
                     {b}
                   </div>
                 </li>
               ))}
             </ul>
+
+            {/* BỘ LỌC GIÁ MỚI THÊM */}
+            <h3 className="sidebar-title" style={{ marginTop: "30px" }}>
+              MỨC GIÁ
+            </h3>
+            <ul className="category-list">
+              <li>
+                <div
+                  onClick={() =>
+                    this.applyFilters(filterCid, filterBrand, null, 10000000)
+                  }
+                  className={`category-item ${isPriceActive(null, 10000000) ? "active-filter" : ""}`}
+                >
+                  Dưới 10.000.000đ
+                </div>
+              </li>
+              <li>
+                <div
+                  onClick={() =>
+                    this.applyFilters(
+                      filterCid,
+                      filterBrand,
+                      10000000,
+                      20000000,
+                    )
+                  }
+                  className={`category-item ${isPriceActive(10000000, 20000000) ? "active-filter" : ""}`}
+                >
+                  10.000.000đ - 20.000.000đ
+                </div>
+              </li>
+              <li>
+                <div
+                  onClick={() =>
+                    this.applyFilters(
+                      filterCid,
+                      filterBrand,
+                      20000000,
+                      40000000,
+                    )
+                  }
+                  className={`category-item ${isPriceActive(20000000, 40000000) ? "active-filter" : ""}`}
+                >
+                  20.000.000đ - 40.000.000đ
+                </div>
+              </li>
+              <li>
+                <div
+                  onClick={() =>
+                    this.applyFilters(filterCid, filterBrand, 40000000, null)
+                  }
+                  className={`category-item ${isPriceActive(40000000, null) ? "active-filter" : ""}`}
+                >
+                  Trên 40.000.000đ
+                </div>
+              </li>
+            </ul>
           </aside>
 
           <main className="home-main-content">
             <h2 className="section-title-left">
-              {isFiltering ? "KẾT QUẢ LỌC SẢN PHẨM" : "SẢN PHẨM MỚI NHẤT"}
+              {isFiltering ? "KẾT QUẢ TÌM KIẾM & LỌC" : "SẢN PHẨM MỚI NHẤT"}
             </h2>
             <div className="product-grid">
               {products.length > 0 ? (
