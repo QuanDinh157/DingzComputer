@@ -5,7 +5,6 @@ class ProductDetailComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      categories: [],
       txtID: "",
       txtName: "",
       txtPrice: 0,
@@ -15,15 +14,6 @@ class ProductDetailComponent extends Component {
       txtStock: 0,
       txtDesc: "",
     };
-  }
-
-  componentDidMount() {
-    // Sửa lại 127.0.0.1 cho đồng bộ an toàn
-    axios
-      .get("https://dingzcomputer.onrender.com/api/categories")
-      .then((res) => {
-        this.setState({ categories: res.data });
-      });
   }
 
   componentDidUpdate(prevProps) {
@@ -128,8 +118,7 @@ class ProductDetailComponent extends Component {
       border: "1px solid #ccc",
     };
 
-    // Tạo sẵn mảng các hãng phổ biến (Tránh gõ tay bị sai)
-    const brandList = [
+    const defaultBrands = [
       "ASUS",
       "ACER",
       "MSI",
@@ -142,6 +131,10 @@ class ProductDetailComponent extends Component {
       "GIGABYTE",
       "COLORFUL",
       "KHÁC",
+    ];
+
+    const combinedBrands = [
+      ...new Set([...defaultBrands, ...(this.props.brands || [])]),
     ];
 
     return (
@@ -166,7 +159,6 @@ class ProductDetailComponent extends Component {
           {this.state.txtID ? "SỬA SẢN PHẨM" : "THÊM SẢN PHẨM MỚI"}
         </h3>
 
-        {/* XỬ LÝ ẢNH HIỂN THỊ ĐẸP HƠN */}
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           {this.state.txtImage ? (
             <img
@@ -266,7 +258,7 @@ class ProductDetailComponent extends Component {
             onChange={(e) => this.setState({ txtBrand: e.target.value })}
           >
             <option value="">-- Chọn Hãng --</option>
-            {brandList.map((brand, index) => (
+            {combinedBrands.map((brand, index) => (
               <option key={index} value={brand}>
                 {brand}
               </option>
@@ -279,7 +271,7 @@ class ProductDetailComponent extends Component {
             onChange={(e) => this.setState({ txtCategory: e.target.value })}
           >
             <option value="">-- Danh Mục --</option>
-            {this.state.categories.map((c) => (
+            {(this.props.categories || []).map((c) => (
               <option key={c._id} value={c._id}>
                 {c.name}
               </option>
@@ -305,7 +297,7 @@ class ProductDetailComponent extends Component {
             style={{
               flex: 1,
               padding: "12px",
-              background: this.state.txtID ? "#0d47a1" : "#1a1a1a", // Nút xanh nếu cập nhật, đen nếu thêm mới
+              background: this.state.txtID ? "#0d47a1" : "#1a1a1a",
               color: "#fff",
               border: "none",
               fontWeight: "bold",

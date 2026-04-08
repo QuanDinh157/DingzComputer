@@ -8,14 +8,17 @@ class ProductComponent extends Component {
     this.state = {
       products: [],
       categories: [],
+      brands: [],
       itemSelected: null,
       txtKeyword: "",
       selCategory: "all",
+      selBrand: "all",
     };
   }
 
   componentDidMount() {
     this.apiGetCategories();
+    this.apiGetBrands();
     this.apiGetProducts();
   }
 
@@ -27,16 +30,26 @@ class ProductComponent extends Component {
       });
   };
 
-  // Hàm lấy sản phẩm có kèm tham số tìm kiếm
-  apiGetProducts = () => {
-    const { txtKeyword, selCategory } = this.state;
+  apiGetBrands = () => {
     axios
-      .get(
-        `https://dingzcomputer.onrender.com/api/products?keyword=${txtKeyword}&categoryId=${selCategory}`,
-      )
+      .get("https://dingzcomputer.onrender.com/api/products/brands")
       .then((res) => {
-        this.setState({ products: res.data });
+        this.setState({ brands: res.data });
       });
+  };
+
+  apiGetProducts = () => {
+    const { txtKeyword, selCategory, selBrand } = this.state;
+    let url = "https://dingzcomputer.onrender.com/api/products?";
+    const params = new URLSearchParams();
+
+    if (txtKeyword) params.append("keyword", txtKeyword);
+    if (selCategory !== "all") params.append("category", selCategory);
+    if (selBrand !== "all") params.append("brand", selBrand);
+
+    axios.get(url + params.toString()).then((res) => {
+      this.setState({ products: res.data });
+    });
   };
 
   btnSearchClick = (e) => {
@@ -50,21 +63,36 @@ class ProductComponent extends Component {
         {c.name}
       </option>
     ));
+
+    const brds = this.state.brands.map((b, index) => (
+      <option key={index} value={b}>
+        {b}
+      </option>
+    ));
+
     const prods = this.state.products.map((item) => (
       <tr
         key={item._id}
         className="datatable"
         onClick={() => this.setState({ itemSelected: item })}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: "pointer", textAlign: "center" }}
       >
-        <td>{item._id.substring(item._id.length - 5)}</td>{" "}
-        {/* Chỉ hiện 5 số cuối ID cho gọn */}
-        <td>{item.name}</td>
-        <td style={{ fontWeight: "bold" }}>{item.price.toLocaleString()}</td>
-        <td>{item.brand}</td>
-        <td>{item.category?.name}</td>
-        <td>
-          <img src={item.image} width="60" alt="" />
+        <td style={{ padding: "8px" }}>
+          {item._id.substring(item._id.length - 5)}
+        </td>
+        <td style={{ padding: "8px", textAlign: "left" }}>{item.name}</td>
+        <td style={{ padding: "8px", fontWeight: "bold" }}>
+          {item.price.toLocaleString("vi-VN")}đ
+        </td>
+        <td style={{ padding: "8px" }}>{item.brand}</td>
+        <td style={{ padding: "8px" }}>{item.category?.name}</td>
+        <td style={{ padding: "8px" }}>
+          <img
+            src={item.image}
+            width="60"
+            alt=""
+            style={{ objectFit: "cover" }}
+          />
         </td>
       </tr>
     ));
@@ -75,7 +103,6 @@ class ProductComponent extends Component {
           QUẢN LÝ KHO LINH KIỆN
         </h2>
 
-        {/* THANH TÌM KIẾM & LỌC */}
         <div
           style={{
             marginBottom: "20px",
@@ -93,6 +120,14 @@ class ProductComponent extends Component {
             style={{ padding: "8px", flex: 1 }}
           />
           <select
+            value={this.state.selBrand}
+            onChange={(e) => this.setState({ selBrand: e.target.value })}
+            style={{ padding: "8px" }}
+          >
+            <option value="all">Tất cả hãng</option>
+            {brds}
+          </select>
+          <select
             value={this.state.selCategory}
             onChange={(e) => this.setState({ selCategory: e.target.value })}
             style={{ padding: "8px" }}
@@ -107,6 +142,7 @@ class ProductComponent extends Component {
               background: "#1a1a1a",
               color: "#fff",
               cursor: "pointer",
+              border: "none",
             }}
           >
             TÌM KIẾM
@@ -114,7 +150,6 @@ class ProductComponent extends Component {
         </div>
 
         <div style={{ display: "flex", gap: "30px" }}>
-          {/* BẢNG DANH SÁCH */}
           <div style={{ flex: 1.5, maxHeight: "600px", overflowY: "auto" }}>
             <table
               border="1"
@@ -126,23 +161,23 @@ class ProductComponent extends Component {
             >
               <thead style={{ background: "#eee" }}>
                 <tr>
-                  <th>ID</th>
-                  <th>Tên</th>
-                  <th>Giá</th>
-                  <th>Hãng</th>
-                  <th>Loại</th>
-                  <th>Ảnh</th>
+                  <th style={{ padding: "10px" }}>ID</th>
+                  <th style={{ padding: "10px" }}>Tên</th>
+                  <th style={{ padding: "10px" }}>Giá</th>
+                  <th style={{ padding: "10px" }}>Hãng</th>
+                  <th style={{ padding: "10px" }}>Loại</th>
+                  <th style={{ padding: "10px" }}>Ảnh</th>
                 </tr>
               </thead>
               <tbody>{prods}</tbody>
             </table>
           </div>
 
-          {/* FORM CHI TIẾT (BÊN PHẢI) */}
           <div style={{ flex: 1 }}>
             <ProductDetailComponent
               item={this.state.itemSelected}
-              categories={this.state.categories} // THÊM DÒNG NÀY: Gửi danh mục xuống cho form nhập
+              categories={this.state.categories}
+              brands={this.state.brands}
               updateProducts={this.apiGetProducts}
             />
           </div>
