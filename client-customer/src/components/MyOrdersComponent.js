@@ -25,7 +25,7 @@ class MyOrdersComponent extends Component {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
-      .get("http://localhost:5000/api/orders/mine", config)
+      .get("https://dingzcomputer.onrender.com/api/orders/mine", config)
       .then((res) => {
         this.setState({ orders: res.data, isLoading: false });
       })

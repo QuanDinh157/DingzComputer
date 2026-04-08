@@ -20,9 +20,11 @@ class ProductComponent extends Component {
   }
 
   apiGetCategories = () => {
-    axios.get("http://localhost:5000/api/categories").then((res) => {
-      this.setState({ categories: res.data });
-    });
+    axios
+      .get("https://dingzcomputer.onrender.com/api/categories")
+      .then((res) => {
+        this.setState({ categories: res.data });
+      });
   };
 
   // Hàm lấy sản phẩm có kèm tham số tìm kiếm
@@ -30,7 +32,7 @@ class ProductComponent extends Component {
     const { txtKeyword, selCategory } = this.state;
     axios
       .get(
-        `http://localhost:5000/api/products?keyword=${txtKeyword}&categoryId=${selCategory}`,
+        `https://dingzcomputer.onrender.com/api/products?keyword=${txtKeyword}&categoryId=${selCategory}`,
       )
       .then((res) => {
         this.setState({ products: res.data });

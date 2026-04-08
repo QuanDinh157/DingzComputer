@@ -73,7 +73,7 @@ class CheckoutComponent extends Component {
     };
 
     axios
-      .post("http://localhost:5000/api/orders", orderData, config)
+      .post("https://dingzcomputer.onrender.com/api/orders", orderData, config)
       .then((res) => {
         if (res.data) {
           Swal.fire({

@@ -24,7 +24,9 @@ class CategoryDetailComponent extends Component {
     const { txtName } = this.state;
     if (txtName) {
       axios
-        .post("http://localhost:5000/api/categories", { name: txtName })
+        .post("https://dingzcomputer.onrender.com/api/categories", {
+          name: txtName,
+        })
         .then((res) => {
           alert("Thêm danh mục thành công!");
           this.btnResetClick(e);
@@ -41,7 +43,9 @@ class CategoryDetailComponent extends Component {
     const { txtID, txtName } = this.state;
     if (txtID && txtName) {
       axios
-        .put(`http://localhost:5000/api/categories/${txtID}`, { name: txtName })
+        .put(`https://dingzcomputer.onrender.com/api/categories/${txtID}`, {
+          name: txtName,
+        })
         .then((res) => {
           alert("Cập nhật thành công");
           this.props.updateCategories();
@@ -54,7 +58,9 @@ class CategoryDetailComponent extends Component {
     e.preventDefault();
     if (window.confirm("Bạn có chắc chắn muốn xóa không?")) {
       axios
-        .delete(`http://localhost:5000/api/categories/${this.state.txtID}`)
+        .delete(
+          `https://dingzcomputer.onrender.com/api/categories/${this.state.txtID}`,
+        )
         .then((res) => {
           alert("Đã xóa");
           this.btnResetClick(e);

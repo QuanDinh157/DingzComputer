@@ -24,7 +24,7 @@ class OrderComponent extends Component {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
-      .get("http://localhost:5000/api/orders", config)
+      .get("https://dingzcomputer.onrender.com/api/orders", config)
       .then((res) => {
         let fetchedOrders = [];
         if (Array.isArray(res.data)) {
@@ -53,7 +53,11 @@ class OrderComponent extends Component {
     };
 
     axios
-      .put(`http://localhost:5000/api/orders/status/${id}`, { status }, config)
+      .put(
+        `https://dingzcomputer.onrender.com/api/orders/status/${id}`,
+        { status },
+        config,
+      )
       .then((res) => {
         if (res.data) {
           Swal.fire("THÀNH CÔNG", `Trạng thái: ${status}`, "success");

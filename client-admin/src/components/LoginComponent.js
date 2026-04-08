@@ -38,7 +38,7 @@ class LoginComponent extends Component {
       localStorage.clear();
 
       axios
-        .post("http://localhost:5000/api/admin/login", account)
+        .post("https://dingzcomputer.onrender.com/api/admin/login", account)
         .then((res) => {
           const token = res.data.token || res.data;
 

@@ -23,21 +23,21 @@ class HomeComponent extends Component {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
-      .get("http://localhost:5000/api/categories", config)
+      .get("https://dingzcomputer.onrender.com/api/categories", config)
       .then((res) => {
         this.setState({ countCategories: res.data.length });
       })
       .catch((err) => console.log(err));
 
     axios
-      .get("http://localhost:5000/api/products", config)
+      .get("https://dingzcomputer.onrender.com/api/products", config)
       .then((res) => {
         this.setState({ countProducts: res.data.length });
       })
       .catch((err) => console.log(err));
 
     axios
-      .get("http://localhost:5000/api/orders", config)
+      .get("https://dingzcomputer.onrender.com/api/orders", config)
       .then((res) => {
         const pendingOrders = res.data.filter(
           (order) => order.status === "PENDING" || order.status === "Pending",

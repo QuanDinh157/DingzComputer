@@ -16,9 +16,11 @@ class CategoryComponent extends Component {
   }
 
   apiGetCategories = () => {
-    axios.get("http://localhost:5000/api/categories").then((res) => {
-      this.setState({ categories: res.data });
-    });
+    axios
+      .get("https://dingzcomputer.onrender.com/api/categories")
+      .then((res) => {
+        this.setState({ categories: res.data });
+      });
   };
 
   trItemClick = (item) => {

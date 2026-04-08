@@ -37,7 +37,7 @@ class SignupComponent extends Component {
       };
 
       axios
-        .post("http://localhost:5000/api/users/register", body)
+        .post("https://dingzcomputer.onrender.com/api/users/register", body)
         .then((res) => {
           if (res.data && res.data.message) {
             alert(res.data.message);
