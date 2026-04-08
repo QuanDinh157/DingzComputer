@@ -6,11 +6,14 @@ const {
   getProducts,
   getProductById,
   getAllBrands,
+  getDynamicPriceRanges,
 } = require("../controllers/productController");
 
 router.get("/brands", getAllBrands);
 
 router.get("/new", getNewProducts);
+
+router.get("/dynamic-ranges", getDynamicPriceRanges);
 
 router.get("/", getProducts);
 

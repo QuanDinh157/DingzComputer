@@ -105,10 +105,70 @@ const getAllBrands = async (req, res) => {
   }
 };
 
+const getDynamicPriceRanges = async (req, res) => {
+  try {
+    const { category } = req.query;
+    let matchStage = {};
+
+    if (category) {
+      const mongoose = require("mongoose");
+      matchStage.category = new mongoose.Types.ObjectId(category);
+    }
+
+    const stats = await Product.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: null,
+          minPrice: { $min: "$price" },
+          maxPrice: { $max: "$price" },
+        },
+      },
+    ]);
+
+    if (stats.length === 0 || stats[0].minPrice === stats[0].maxPrice) {
+      return res.status(200).json([]);
+    }
+
+    const min = stats[0].minPrice;
+    const max = stats[0].maxPrice;
+
+    const step = Math.ceil((max - min) / 4 / 500000) * 500000;
+
+    const ranges = [
+      {
+        label: `Dưới ${(min + step).toLocaleString("vi-VN")}đ`,
+        min: null,
+        max: min + step,
+      },
+      {
+        label: `Từ ${(min + step).toLocaleString("vi-VN")}đ - ${(min + step * 2).toLocaleString("vi-VN")}đ`,
+        min: min + step,
+        max: min + step * 2,
+      },
+      {
+        label: `Từ ${(min + step * 2).toLocaleString("vi-VN")}đ - ${(min + step * 3).toLocaleString("vi-VN")}đ`,
+        min: min + step * 2,
+        max: min + step * 3,
+      },
+      {
+        label: `Trên ${(min + step * 3).toLocaleString("vi-VN")}đ`,
+        min: min + step * 3,
+        max: null,
+      },
+    ];
+
+    res.status(200).json(ranges);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createProduct,
   getProducts,
   getNewProducts,
   getProductById,
   getAllBrands,
+  getDynamicPriceRanges,
 };

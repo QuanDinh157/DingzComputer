@@ -14,6 +14,7 @@ class HomeComponent extends Component {
       products: [],
       categories: [],
       brands: [],
+      dynamicRanges: [],
       banners: [
         "/images/Banner_01.png",
         "/images/Banner_02.png",
@@ -32,9 +33,9 @@ class HomeComponent extends Component {
   componentDidMount() {
     this.apiGetCategories();
     this.apiGetBrands();
+    this.apiGetDynamicRanges(null);
     this.startBannerTimer();
 
-    // Bắt cái từ khóa Search trên thanh URL (nếu có)
     const params = new URLSearchParams(window.location.search);
     const keyword = params.get("keyword");
 
@@ -64,7 +65,17 @@ class HomeComponent extends Component {
     this.startBannerTimer();
   };
 
-  // Hàm mới để xử lý Search riêng
+  apiGetDynamicRanges(cid) {
+    let url = "https://dingzcomputer.onrender.com/api/products/dynamic-ranges";
+    if (cid) url += `?category=${cid}`;
+    axios
+      .get(url)
+      .then((res) => {
+        this.setState({ dynamicRanges: res.data });
+      })
+      .catch((err) => console.log(err.message));
+  }
+
   apiSearchProducts(keyword) {
     axios
       .get(`https://dingzcomputer.onrender.com/api/products?keyword=${keyword}`)
@@ -108,12 +119,10 @@ class HomeComponent extends Component {
       .catch((err) => console.log(err.message));
   }
 
-  // Siêu hàm lọc: Kết hợp Danh mục + Thương hiệu + Giá
   applyFilters = (cid, brand, minPrice, maxPrice) => {
     let url = `https://dingzcomputer.onrender.com/api/products?`;
     const params = new URLSearchParams();
 
-    // Giữ lại keyword search nếu đang search
     const urlParams = new URLSearchParams(window.location.search);
     const keyword = urlParams.get("keyword");
     if (keyword) params.append("keyword", keyword);
@@ -122,6 +131,10 @@ class HomeComponent extends Component {
     if (brand) params.append("brand", brand);
     if (minPrice) params.append("minPrice", minPrice);
     if (maxPrice) params.append("maxPrice", maxPrice);
+
+    if (cid !== this.state.filterCid) {
+      this.apiGetDynamicRanges(cid);
+    }
 
     axios
       .get(url + params.toString())
@@ -182,6 +195,7 @@ class HomeComponent extends Component {
       products,
       categories,
       brands,
+      dynamicRanges,
       filterCid,
       filterBrand,
       filterMinPrice,
@@ -189,7 +203,6 @@ class HomeComponent extends Component {
       isFiltering,
     } = this.state;
 
-    // Xác định đang chọn mức giá nào để làm nổi bật (CSS active)
     const isPriceActive = (min, max) =>
       filterMinPrice === min && filterMaxPrice === max;
 
@@ -294,8 +307,8 @@ class HomeComponent extends Component {
               <li>
                 <div
                   onClick={() => {
-                    // Xóa query trên URL khi bấm Tất cả sản phẩm
                     window.history.pushState({}, "", "/home");
+                    this.apiGetDynamicRanges(null);
                     this.apiGetNewProducts();
                   }}
                   className={`category-item ${
@@ -309,12 +322,7 @@ class HomeComponent extends Component {
                 <li key={item._id}>
                   <div
                     onClick={() =>
-                      this.applyFilters(
-                        item._id,
-                        filterBrand,
-                        filterMinPrice,
-                        filterMaxPrice,
-                      )
+                      this.applyFilters(item._id, filterBrand, null, null)
                     }
                     className={`category-item ${
                       filterCid === item._id ? "active-filter" : ""
@@ -351,62 +359,32 @@ class HomeComponent extends Component {
               ))}
             </ul>
 
-            {/* BỘ LỌC GIÁ MỚI THÊM */}
-            <h3 className="sidebar-title" style={{ marginTop: "30px" }}>
-              MỨC GIÁ
-            </h3>
-            <ul className="category-list">
-              <li>
-                <div
-                  onClick={() =>
-                    this.applyFilters(filterCid, filterBrand, null, 10000000)
-                  }
-                  className={`category-item ${isPriceActive(null, 10000000) ? "active-filter" : ""}`}
-                >
-                  Dưới 10.000.000đ
-                </div>
-              </li>
-              <li>
-                <div
-                  onClick={() =>
-                    this.applyFilters(
-                      filterCid,
-                      filterBrand,
-                      10000000,
-                      20000000,
-                    )
-                  }
-                  className={`category-item ${isPriceActive(10000000, 20000000) ? "active-filter" : ""}`}
-                >
-                  10.000.000đ - 20.000.000đ
-                </div>
-              </li>
-              <li>
-                <div
-                  onClick={() =>
-                    this.applyFilters(
-                      filterCid,
-                      filterBrand,
-                      20000000,
-                      40000000,
-                    )
-                  }
-                  className={`category-item ${isPriceActive(20000000, 40000000) ? "active-filter" : ""}`}
-                >
-                  20.000.000đ - 40.000.000đ
-                </div>
-              </li>
-              <li>
-                <div
-                  onClick={() =>
-                    this.applyFilters(filterCid, filterBrand, 40000000, null)
-                  }
-                  className={`category-item ${isPriceActive(40000000, null) ? "active-filter" : ""}`}
-                >
-                  Trên 40.000.000đ
-                </div>
-              </li>
-            </ul>
+            {dynamicRanges.length > 0 && (
+              <>
+                <h3 className="sidebar-title" style={{ marginTop: "30px" }}>
+                  MỨC GIÁ
+                </h3>
+                <ul className="category-list">
+                  {dynamicRanges.map((range, index) => (
+                    <li key={index}>
+                      <div
+                        onClick={() =>
+                          this.applyFilters(
+                            filterCid,
+                            filterBrand,
+                            range.min,
+                            range.max,
+                          )
+                        }
+                        className={`category-item ${isPriceActive(range.min, range.max) ? "active-filter" : ""}`}
+                      >
+                        {range.label}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </aside>
 
           <main className="home-main-content">
