@@ -5,8 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import MainComponent from "./components/MainComponent";
 import axios from "axios";
 
-axios.defaults.baseURL =
-  "https://99dd6ad2-d9a2-49c6-9433-2fa2f6669151-00-19pg7engwesf5-8000.sisko.replit.dev/api";
+axios.defaults.baseURL = "/api";
 
 class App extends Component {
   render() {
