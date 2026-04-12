@@ -5,8 +5,10 @@ import "react-toastify/dist/ReactToastify.css";
 import MainComponent from "./components/MainComponent";
 import axios from "axios";
 
+// THAY CÁI LINK NÀY BẰNG LINK CỔNG 8000 TRÊN REPLIT CỦA ÔNG
+// NHỚ PHẢI CÓ /api Ở CUỐI
 axios.defaults.baseURL =
-  "https://99dd6ad2-d9a2-49c6-9433-2fa2f6669151-00-19pg7engwesf5.sisko.replit.dev";
+  "https://99dd6ad2-d9a2-49c6-9433-2fa2f6669151-00-19pg7engwesf5.sisko.replit.dev/api";
 
 class App extends Component {
   render() {
