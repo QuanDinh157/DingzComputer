@@ -48,12 +48,12 @@ const addOrderItems = async (req, res) => {
 
     const createdOrder = await order.save();
 
-    await sendOrderEmail(
+    sendOrderEmail(
       email || req.user.email,
       createdOrder._id,
       createdOrder.totalPrice,
       customerName || req.user.name,
-    );
+    ).catch((err) => console.error("Lỗi gửi mail ngầm:", err.message));
 
     res.status(201).json(createdOrder);
   } catch (error) {
