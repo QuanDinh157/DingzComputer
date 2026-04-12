@@ -35,6 +35,22 @@ class MyOrdersComponent extends Component {
       });
   }
 
+  getStatusDisplay = (status) => {
+    switch (status) {
+      case "PROCESSING":
+        return { bg: "#e0f7fa", color: "#0097a7", text: "ĐANG XỬ LÝ" };
+      case "SHIPPED":
+        return { bg: "#e3f2fd", color: "#0288d1", text: "ĐANG GIAO HÀNG" };
+      case "COMPLETED":
+        return { bg: "#e6f4ea", color: "#1e8e3e", text: "HOÀN THÀNH" };
+      case "CANCELLED":
+        return { bg: "#ffebee", color: "#d32f2f", text: "ĐÃ HỦY" };
+      case "PENDING":
+      default:
+        return { bg: "#fff3e0", color: "#f57c00", text: "CHỜ DUYỆT" };
+    }
+  };
+
   render() {
     const savedCustomer = localStorage.getItem("customer");
     const currentUser =
@@ -232,67 +248,56 @@ class MyOrdersComponent extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((o) => (
-                      <tr
-                        key={o._id}
-                        style={{ borderBottom: "1px solid #eee" }}
-                      >
-                        <td
-                          style={{
-                            padding: "12px",
-                            fontWeight: "bold",
-                            color: "#0d47a1",
-                          }}
+                    {orders.map((o) => {
+                      const style = this.getStatusDisplay(o.status);
+                      return (
+                        <tr
+                          key={o._id}
+                          style={{ borderBottom: "1px solid #eee" }}
                         >
-                          {o._id.substring(o._id.length - 6).toUpperCase()}
-                        </td>
-                        <td style={{ padding: "12px" }}>
-                          {new Date(o.createdAt || o.cdate).toLocaleString(
-                            "vi-VN",
-                          )}
-                        </td>
-                        <td
-                          style={{
-                            padding: "12px",
-                            fontWeight: "bold",
-                            color: "#d32f2f",
-                          }}
-                        >
-                          {(o.totalPrice || o.total || 0).toLocaleString(
-                            "vi-VN",
-                          )}
-                          ₫
-                        </td>
-                        <td style={{ padding: "12px" }}>
-                          <span
+                          <td
                             style={{
-                              padding: "5px 10px",
-                              borderRadius: "15px",
-                              fontSize: "0.8rem",
+                              padding: "12px",
                               fontWeight: "bold",
-                              background:
-                                o.status === "APPROVED"
-                                  ? "#e6f4ea"
-                                  : o.status === "CANCELED"
-                                    ? "#ffebee"
-                                    : "#fff3e0",
-                              color:
-                                o.status === "APPROVED"
-                                  ? "#1e8e3e"
-                                  : o.status === "CANCELED"
-                                    ? "#d32f2f"
-                                    : "#f57c00",
+                              color: "#0d47a1",
                             }}
                           >
-                            {o.status === "APPROVED"
-                              ? "ĐÃ DUYỆT"
-                              : o.status === "CANCELED"
-                                ? "ĐÃ HỦY"
-                                : "CHỜ DUYỆT"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                            {o._id.substring(o._id.length - 6).toUpperCase()}
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            {new Date(o.createdAt || o.cdate).toLocaleString(
+                              "vi-VN",
+                            )}
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              fontWeight: "bold",
+                              color: "#d32f2f",
+                            }}
+                          >
+                            {(o.totalPrice || o.total || 0).toLocaleString(
+                              "vi-VN",
+                            )}
+                            ₫
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <span
+                              style={{
+                                padding: "5px 10px",
+                                borderRadius: "15px",
+                                fontSize: "0.8rem",
+                                fontWeight: "bold",
+                                backgroundColor: style.bg,
+                                color: style.color,
+                              }}
+                            >
+                              {style.text}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

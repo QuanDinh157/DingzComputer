@@ -53,7 +53,7 @@ class LoginComponent extends Component {
       localStorage.setItem("token", token);
 
       const displayName = userData.name || userData.username || "bạn";
-      toast.success(displayName + " đang truy cập hệ thống quản lý!");
+      toast.success(displayName + " đang truy cập");
 
       setTimeout(() => {
         if (role === "admin") {
