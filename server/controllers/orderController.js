@@ -50,10 +50,10 @@ const addOrderItems = async (req, res) => {
 
     sendOrderEmail(
       email || req.user.email,
-      createdOrder._id,
-      createdOrder.totalPrice,
+      createdOrder,
       customerName || req.user.name,
-    ).catch((err) => console.error("Lỗi gửi mail ngầm:", err.message));
+      "new",
+    ).catch((err) => console.error("Lỗi gửi mail tạo đơn:", err.message));
 
     res.status(201).json(createdOrder);
   } catch (error) {
@@ -61,4 +61,40 @@ const addOrderItems = async (req, res) => {
   }
 };
 
-module.exports = { addOrderItems };
+const updateOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "user",
+      "name email",
+    );
+
+    if (order) {
+      order.status = req.body.status;
+      const updatedOrder = await order.save();
+
+      if (req.body.status === "shipping" || req.body.status === "cancelled") {
+        const emailKhach = order.user
+          ? order.user.email
+          : "khachhang@gmail.com";
+        const tenKhach = order.user ? order.user.name : "Quý khách";
+
+        sendOrderEmail(
+          emailKhach,
+          updatedOrder,
+          tenKhach,
+          req.body.status,
+        ).catch((err) =>
+          console.error("Lỗi gửi mail trạng thái:", err.message),
+        );
+      }
+
+      res.json(updatedOrder);
+    } else {
+      res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { addOrderItems, updateOrderStatus };

@@ -4,6 +4,7 @@ const { addOrderItems } = require("../controllers/orderController");
 const { protect, admin } = require("../middleware/authMiddleware");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const sendOrderEmail = require("../utils/sendEmail");
 
 router.post("/", protect, addOrderItems);
 
@@ -37,22 +38,24 @@ router.get("/", protect, admin, async (req, res) => {
   }
 });
 
-router.put("/status/:id", protect, admin, async (req, res) => {
+router.put("/:id/status", protect, admin, async (req, res) => {
   try {
-    const { status } = req.body;
-    const order = await Order.findById(req.params.id);
+    const { status } = req.body; // shipping hoặc cancelled
+    const order = await Order.findById(req.params.id).populate(
+      "user",
+      "name email",
+    );
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
-    if (status === "CANCELLED" && order.status !== "CANCELLED") {
+    if (status === "cancelled" && order.status !== "cancelled") {
       for (let i = 0; i < order.orderItems.length; i++) {
         const item = order.orderItems[i];
         const productInDb = await Product.findById(item.product);
-
         if (productInDb) {
-          productInDb.countInStock += item.qty;
+          productInDb.countInStock += item.qty || item.quantity;
           await productInDb.save();
         }
       }
@@ -60,6 +63,13 @@ router.put("/status/:id", protect, admin, async (req, res) => {
 
     order.status = status;
     const updatedOrder = await order.save();
+
+    const emailTo = order.user ? order.user.email : order.email;
+    const nameTo = order.user ? order.user.name : "Quý khách";
+
+    sendOrderEmail(emailTo, updatedOrder, nameTo, status).catch((err) =>
+      console.error("Lỗi gửi mail trạng thái:", err.message),
+    );
 
     res.json(updatedOrder);
   } catch (error) {
