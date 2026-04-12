@@ -36,7 +36,7 @@ app.get("/", (req, res) => {
   res.send("API của Dingz_computer đang chạy !");
 });
 
-const PORT = process.env.PORT || 8000;
+const PORT = 8000;
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại cổng ${PORT}`);
 });
