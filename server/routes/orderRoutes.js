@@ -3,6 +3,7 @@ const router = express.Router();
 const { addOrderItems } = require("../controllers/orderController");
 const { protect, admin } = require("../middleware/authMiddleware");
 const Order = require("../models/Order");
+const Product = require("../models/Product");
 
 router.post("/", protect, addOrderItems);
 
@@ -39,17 +40,28 @@ router.get("/", protect, admin, async (req, res) => {
 router.put("/status/:id", protect, admin, async (req, res) => {
   try {
     const { status } = req.body;
-    const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: status },
+    const order = await Order.findById(req.params.id);
 
-      { returnDocument: "after" },
-    );
-    if (updatedOrder) {
-      res.json(updatedOrder);
-    } else {
-      res.status(404).json({ message: "Order not found" });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
+
+    if (status === "CANCELLED" && order.status !== "CANCELLED") {
+      for (let i = 0; i < order.orderItems.length; i++) {
+        const item = order.orderItems[i];
+        const productInDb = await Product.findById(item.product);
+
+        if (productInDb) {
+          productInDb.countInStock += item.qty;
+          await productInDb.save();
+        }
+      }
+    }
+
+    order.status = status;
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

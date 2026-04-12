@@ -22,8 +22,17 @@ const orderSchema = new mongoose.Schema(
       phone: { type: String, required: true },
     },
     totalPrice: { type: Number, required: true, default: 0.0 },
-
-    status: { type: String, default: "PENDING" },
+    paymentMethod: {
+      type: String,
+      enum: ["COD", "VIETQR"],
+      required: true,
+      default: "COD",
+    },
+    status: {
+      type: String,
+      enum: ["PENDING", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"],
+      default: "PENDING",
+    },
   },
   { timestamps: true },
 );

@@ -34,7 +34,6 @@ class OrderComponent extends Component {
         } else if (res.data && Array.isArray(res.data.data)) {
           fetchedOrders = res.data.data;
         }
-
         this.setState({ orders: fetchedOrders, loading: false });
       })
       .catch((err) => {
@@ -68,63 +67,64 @@ class OrderComponent extends Component {
       .catch((err) => Swal.fire("LỖI", "Thao tác thất bại!", "error"));
   };
 
+  getStatusStyles = (status) => {
+    switch (status) {
+      case "PROCESSING":
+        return { bg: "#fff3e0", color: "#f57c00", text: "ĐANG XỬ LÝ" };
+      case "SHIPPED":
+        return { bg: "#e3f2fd", color: "#0288d1", text: "ĐANG GIAO" };
+      case "COMPLETED":
+        return { bg: "#e6f4ea", color: "#1e8e3e", text: "HOÀN THÀNH" };
+      case "CANCELLED":
+        return { bg: "#ffebee", color: "#d32f2f", text: "ĐÃ HỦY" };
+      default:
+        return { bg: "#f5f5f5", color: "#757575", text: "CHỜ DUYỆT" };
+    }
+  };
+
   render() {
-    const hasOrders = this.state.orders && this.state.orders.length > 0;
+    const { orders, itemSelected, loading } = this.state;
+    const hasOrders = orders && orders.length > 0;
 
     const rows = hasOrders
-      ? this.state.orders.map((item) => (
-          <tr
-            key={item._id}
-            className="datatable"
-            onClick={() => this.setState({ itemSelected: item })}
-            style={{
-              cursor: "pointer",
-              backgroundColor:
-                this.state.itemSelected?._id === item._id ? "#f0f7ff" : "white",
-            }}
-          >
-            <td style={{ padding: "15px" }}>
-              {item._id.substring(item._id.length - 5).toUpperCase()}
-            </td>
-            <td>
-              {new Date(item.cdate || item.createdAt).toLocaleString("vi-VN")}
-            </td>
-            <td>{item.user?.name || item.username || "Khách hàng"}</td>
-            <td style={{ fontWeight: "bold" }}>
-              {(item.totalPrice || item.total || 0).toLocaleString()} VNĐ
-            </td>
-            <td>
-              <span
-                style={{
-                  padding: "5px 10px",
-                  borderRadius: "15px",
-                  fontSize: "0.8rem",
-                  fontWeight: "bold",
-                  background:
-                    item.status === "APPROVED"
-                      ? "#e6f4ea"
-                      : item.status === "CANCELED"
-                        ? "#ffebee"
-                        : "#fff3e0",
-                  color:
-                    item.status === "APPROVED"
-                      ? "#1e8e3e"
-                      : item.status === "CANCELED"
-                        ? "#d32f2f"
-                        : "#f57c00",
-                }}
-              >
-                {!item.status ||
-                item.status === "PENDING" ||
-                item.status === "Pending"
-                  ? "CHỜ DUYỆT"
-                  : item.status === "APPROVED"
-                    ? "ĐÃ DUYỆT"
-                    : "ĐÃ HỦY"}
-              </span>
-            </td>
-          </tr>
-        ))
+      ? orders.map((item) => {
+          const style = this.getStatusStyles(item.status);
+          return (
+            <tr
+              key={item._id}
+              className="datatable"
+              onClick={() => this.setState({ itemSelected: item })}
+              style={{
+                cursor: "pointer",
+                backgroundColor:
+                  itemSelected?._id === item._id ? "#f0f7ff" : "white",
+              }}
+            >
+              <td style={{ padding: "15px" }}>
+                {item._id.substring(item._id.length - 5).toUpperCase()}
+              </td>
+              <td>{new Date(item.createdAt).toLocaleString("vi-VN")}</td>
+              <td>{item.user?.name || "Khách hàng"}</td>
+              <td style={{ fontWeight: "bold" }}>
+                {item.totalPrice.toLocaleString()} VNĐ
+              </td>
+              <td>
+                <span
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: "15px",
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                    background: style.bg,
+                    color: style.color,
+                  }}
+                >
+                  {style.text}
+                </span>
+              </td>
+            </tr>
+          );
+        })
       : null;
 
     return (
@@ -178,9 +178,9 @@ class OrderComponent extends Component {
                         colSpan="5"
                         style={{ padding: "30px", color: "#888" }}
                       >
-                        {this.state.loading
+                        {loading
                           ? "Đang tải dữ liệu..."
-                          : "Chưa có đơn hàng nào được tìm thấy."}
+                          : "Chưa có đơn hàng nào."}
                       </td>
                     </tr>
                   )}
@@ -189,7 +189,7 @@ class OrderComponent extends Component {
             </div>
           </div>
 
-          {this.state.itemSelected && (
+          {itemSelected && (
             <div
               style={{
                 flex: 1,
@@ -208,40 +208,93 @@ class OrderComponent extends Component {
                 XỬ LÝ ĐƠN HÀNG
               </h3>
               <p>
-                Mã đơn: <strong>{this.state.itemSelected._id}</strong>
+                Mã đơn: <strong>{itemSelected._id}</strong>
               </p>
-              <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-                {(!this.state.itemSelected.status ||
-                  this.state.itemSelected.status === "PENDING" ||
-                  this.state.itemSelected.status === "Pending") && (
-                  <>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  marginTop: "20px",
+                }}
+              >
+                {itemSelected.status === "PENDING" && (
+                  <button
+                    onClick={() =>
+                      this.btnStatusClick(itemSelected._id, "PROCESSING")
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      background: "#1e8e3e",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    XÁC NHẬN ĐƠN
+                  </button>
+                )}
+
+                {itemSelected.status === "PROCESSING" && (
+                  <button
+                    onClick={() =>
+                      this.btnStatusClick(itemSelected._id, "SHIPPED")
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      background: "#0288d1",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    GIAO HÀNG
+                  </button>
+                )}
+
+                {itemSelected.status === "SHIPPED" && (
+                  <button
+                    onClick={() =>
+                      this.btnStatusClick(itemSelected._id, "COMPLETED")
+                    }
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      background: "#6a1b9a",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    HOÀN THÀNH
+                  </button>
+                )}
+
+                {itemSelected.status !== "COMPLETED" &&
+                  itemSelected.status !== "CANCELLED" && (
                     <button
-                      onClick={() =>
-                        this.btnStatusClick(
-                          this.state.itemSelected._id,
-                          "APPROVED",
-                        )
-                      }
-                      style={{
-                        flex: 1,
-                        padding: "12px",
-                        background: "#1e8e3e",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
+                      onClick={() => {
+                        Swal.fire({
+                          title: "Xác nhận hủy?",
+                          text: "Hàng sẽ được tự động cộng trả lại vào kho!",
+                          icon: "warning",
+                          showCancelButton: true,
+                          confirmButtonColor: "#d33",
+                          confirmButtonText: "Hủy đơn",
+                        }).then((result) => {
+                          if (result.isConfirmed)
+                            this.btnStatusClick(itemSelected._id, "CANCELLED");
+                        });
                       }}
-                    >
-                      DUYỆT ĐƠN
-                    </button>
-                    <button
-                      onClick={() =>
-                        this.btnStatusClick(
-                          this.state.itemSelected._id,
-                          "CANCELED",
-                        )
-                      }
                       style={{
                         flex: 1,
                         padding: "12px",
@@ -255,12 +308,11 @@ class OrderComponent extends Component {
                     >
                       HỦY ĐƠN
                     </button>
-                  </>
-                )}
+                  )}
               </div>
               <div style={{ marginTop: "30px" }}>
                 <OrderDetailComponent
-                  order={this.state.itemSelected}
+                  order={itemSelected}
                   updateOrders={this.apiGetOrders}
                 />
               </div>
