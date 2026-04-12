@@ -2,19 +2,19 @@ const nodemailer = require("nodemailer");
 
 const sendOrderEmail = async (emailTo, orderId, totalPrice, customerName) => {
   try {
-    // ✅ tạo transporter chuẩn Gmail
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      family: 4,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
 
-    // (optional) check kết nối
     await transporter.verify();
 
-    // ✅ nội dung mail
     const mailOptions = {
       from: `"Dingz Computer" <${process.env.EMAIL_USER}>`,
       to: emailTo,
@@ -33,9 +33,7 @@ const sendOrderEmail = async (emailTo, orderId, totalPrice, customerName) => {
               .toString()
               .slice(-6)
               .toUpperCase()}</p>
-            <p><strong>Tổng tiền:</strong> ${totalPrice.toLocaleString(
-              "vi-VN",
-            )} VNĐ</p>
+            <p><strong>Tổng tiền:</strong> ${totalPrice.toLocaleString("vi-VN")} VNĐ</p>
           </div>
 
           <p>Hotline hỗ trợ: 0902876722</p>
