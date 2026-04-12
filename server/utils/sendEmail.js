@@ -16,25 +16,31 @@ const sendOrderEmail = async (emailTo, orderId, totalPrice, customerName) => {
     });
 
     const mailOptions = {
-      from: `"Dingz Computer" <dingzcraft157@gmail.com>`,
+      from: '"Dingz Computer" <dingzcraft157@gmail.com>',
       to: emailTo,
       subject: `[Dingz Computer] Xác nhận đơn hàng #${orderId.toString().slice(-6).toUpperCase()}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
           <h2 style="color: #0d47a1; text-align: center;">CẢM ƠN BẠN ĐÃ ĐẶT HÀNG!</h2>
           <p>Xin chào <strong>${customerName}</strong>,</p>
-          <p>Dingz Computer đã nhận được đơn hàng của bạn.</p>
-          <div style="background-color: #f8f9fa; padding: 15px; margin: 20px 0;">
-            <p><strong>Mã đơn:</strong> ${orderId.toString().slice(-6).toUpperCase()}</p>
-            <p><strong>Tổng tiền:</strong> ${totalPrice.toLocaleString("vi-VN")} VNĐ</p>
+          <p>Dingz Computer đã nhận được yêu cầu đặt hàng của bạn. Chúng tôi đang tiến hành xử lý đơn hàng trong thời gian sớm nhất.</p>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Mã đơn hàng:</strong> <span style="color: #d32f2f; font-weight: bold;">${orderId.toString().slice(-6).toUpperCase()}</span></p>
+            <p><strong>Tổng thanh toán:</strong> <span style="color: #d32f2f; font-weight: bold;">${totalPrice.toLocaleString("vi-VN")} VNĐ</span></p>
+            <p><strong>Trạng thái:</strong> CHỜ DUYỆT</p>
           </div>
-          <p>Hotline: 0902876722</p>
+
+          <p>Bạn có thể theo dõi trạng thái đơn hàng tại mục <strong>Lịch sử mua hàng</strong> trên website.</p>
+          <p>Mọi thắc mắc vui lòng liên hệ Hotline: <strong>0902876722</strong>.</p>
+          <hr style="border: 0; border-top: 1px solid #eee;" />
+          <p style="text-align: center; color: #888; font-size: 12px;">Trân trọng,<br>Đội ngũ Dingz Computer</p>
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("=> THÀNH CÔNG RỒI SẾP ƠI! MAIL ĐÃ BAY!");
+    console.log("=> Đã gửi email đến:", emailTo);
   } catch (error) {
     console.error("Lỗi gửi mail:", error.message);
   }

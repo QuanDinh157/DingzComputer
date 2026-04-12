@@ -37,7 +37,7 @@ class CheckoutComponent extends Component {
 
   btnConfirmOrderClick = (e) => {
     e.preventDefault();
-    const { mycart, token } = this.context;
+    const { mycart, token, user } = this.context;
     const { address, phone, city } = this.state;
 
     if (!address.trim() || !phone.trim()) {
@@ -62,9 +62,10 @@ class CheckoutComponent extends Component {
         (sum, item) => sum + item.product.price * item.quantity,
         0,
       ),
+      email: user.email,
+      customerName: user.name,
     };
 
-    // PHẦN QUAN TRỌNG: Gửi token kèm chữ Bearer để khớp với Backend protect middleware
     const config = {
       headers: {
         "Content-Type": "application/json",

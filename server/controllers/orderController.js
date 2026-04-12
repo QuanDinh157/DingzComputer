@@ -4,8 +4,15 @@ const sendOrderEmail = require("../utils/sendEmail");
 
 const addOrderItems = async (req, res) => {
   try {
-    const { orderItems, shippingAddress, totalPrice, total, paymentMethod } =
-      req.body;
+    const {
+      orderItems,
+      shippingAddress,
+      totalPrice,
+      total,
+      paymentMethod,
+      email,
+      customerName,
+    } = req.body;
 
     if (orderItems && orderItems.length === 0) {
       return res.status(400).json({ message: "Giỏ hàng đang trống" });
@@ -41,11 +48,11 @@ const addOrderItems = async (req, res) => {
 
     const createdOrder = await order.save();
 
-    sendOrderEmail(
-      req.user.email,
+    await sendOrderEmail(
+      email || req.user.email,
       createdOrder._id,
       createdOrder.totalPrice,
-      req.user.name,
+      customerName || req.user.name,
     );
 
     res.status(201).json(createdOrder);
