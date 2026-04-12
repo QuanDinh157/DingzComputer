@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const sendOrderEmail = require("../utils/sendEmail");
 
 const addOrderItems = async (req, res) => {
   try {
@@ -39,6 +40,13 @@ const addOrderItems = async (req, res) => {
     });
 
     const createdOrder = await order.save();
+
+    sendOrderEmail(
+      req.user.email,
+      createdOrder._id,
+      createdOrder.totalPrice,
+      req.user.name,
+    );
 
     res.status(201).json(createdOrder);
   } catch (error) {
