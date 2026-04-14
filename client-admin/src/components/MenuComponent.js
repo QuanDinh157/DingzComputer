@@ -7,10 +7,6 @@ class MenuComponent extends Component {
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
     localStorage.removeItem("customer");
-
-    const currentPort = window.location.port;
-    const customerPort = currentPort === "3000" ? "3001" : "3000";
-
     window.location.href = "https://dingzcustomer.onrender.com/home";
   };
 
@@ -93,7 +89,6 @@ class MenuComponent extends Component {
               CUSTOMER
             </Link>
           </li>
-
           <li style={{ marginLeft: "auto", color: "#61dafb" }}>
             Hello <b>Admin</b> |{" "}
             <Link
