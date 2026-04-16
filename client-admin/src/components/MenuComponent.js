@@ -7,7 +7,7 @@ class MenuComponent extends Component {
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
     localStorage.removeItem("customer");
-    window.location.href = "https://dingz-computer.vercel.app/home";
+    window.location.href = "https://dingz-customer.vercel.app/home";
   };
 
   render() {
