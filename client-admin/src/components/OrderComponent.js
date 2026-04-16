@@ -64,7 +64,11 @@ class OrderComponent extends Component {
           this.setState({ itemSelected: null });
         }
       })
-      .catch((err) => Swal.fire("LỖI", "Thao tác thất bại!", "error"));
+      .catch((err) => {
+        const errorMsg =
+          err.response?.data?.message || err.message || "Thao tác thất bại!";
+        Swal.fire("LỖI TỪ BACKEND", errorMsg, "error");
+      });
   };
 
   getStatusStyles = (status) => {

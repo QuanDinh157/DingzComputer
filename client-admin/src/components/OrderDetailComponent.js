@@ -1,45 +1,6 @@
 import React, { Component } from "react";
-import axios from "axios";
 
 class OrderDetailComponent extends Component {
-  handleUpdateStatus = async (newStatus) => {
-    const { order } = this.props;
-
-    const confirmMsg =
-      newStatus === "shipping"
-        ? "Xác nhận giao đơn hàng này và gửi mail cho khách?"
-        : "Xác nhận hủy đơn hàng này?";
-
-    if (window.confirm(confirmMsg)) {
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        };
-
-        const { data } = await axios.put(
-          `https://${window.location.hostname}/api/orders/${order._id}/status`,
-          { status: newStatus },
-          config,
-        );
-
-        if (data) {
-          alert(
-            `Đơn hàng đã chuyển sang: ${newStatus === "shipping" ? "Đang giao" : "Đã hủy"}`,
-          );
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error("Lỗi cập nhật trạng thái:", error);
-        alert(
-          "Lỗi: " +
-            (error.response?.data?.message || "Không thể cập nhật đơn hàng"),
-        );
-      }
-    }
-  };
-
   render() {
     const { order } = this.props;
     const productList = order.orderItems || order.items || [];
@@ -60,6 +21,28 @@ class OrderDetailComponent extends Component {
         </td>
       </tr>
     ));
+
+    let statusText = "CHỜ DUYỆT";
+    let statusBg = "#f5f5f5";
+    let statusColor = "#757575";
+
+    if (order.status === "PROCESSING") {
+      statusText = "ĐANG XỬ LÝ";
+      statusBg = "#fff3e0";
+      statusColor = "#f57c00";
+    } else if (order.status === "SHIPPED") {
+      statusText = "ĐANG GIAO";
+      statusBg = "#e3f2fd";
+      statusColor = "#0288d1";
+    } else if (order.status === "COMPLETED") {
+      statusText = "HOÀN THÀNH";
+      statusBg = "#e6f4ea";
+      statusColor = "#1e8e3e";
+    } else if (order.status === "CANCELLED") {
+      statusText = "ĐÃ HỦY";
+      statusBg = "#ffebee";
+      statusColor = "#d32f2f";
+    }
 
     return (
       <div
@@ -94,26 +77,12 @@ class OrderDetailComponent extends Component {
               fontSize: "0.8rem",
               padding: "4px 10px",
               borderRadius: "20px",
-              background:
-                order.status === "shipping"
-                  ? "#fff3e0"
-                  : order.status === "cancelled"
-                    ? "#ffebee"
-                    : "#e8f5e9",
-              color:
-                order.status === "shipping"
-                  ? "#e67e22"
-                  : order.status === "cancelled"
-                    ? "#d32f2f"
-                    : "#2e7d32",
+              background: statusBg,
+              color: statusColor,
               border: "1px solid",
             }}
           >
-            {order.status === "shipping"
-              ? "ĐANG GIAO"
-              : order.status === "cancelled"
-                ? "ĐÃ HỦY"
-                : "CHỜ XỬ LÝ"}
+            {statusText}
           </span>
         </h4>
 
@@ -138,38 +107,6 @@ class OrderDetailComponent extends Component {
               {order.shippingAddress?.address || "Chưa cập nhật"}
             </p>
           </div>
-
-          {order.status !== "shipping" && order.status !== "cancelled" && (
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button
-                onClick={() => this.handleUpdateStatus("shipping")}
-                style={{
-                  padding: "10px 15px",
-                  background: "#e67e22",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                }}
-              >
-                XÁC NHẬN GIAO HÀNG
-              </button>
-              <button
-                onClick={() => this.handleUpdateStatus("cancelled")}
-                style={{
-                  padding: "10px 15px",
-                  background: "#fff",
-                  color: "#d32f2f",
-                  border: "1px solid #d32f2f",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
-                HỦY ĐƠN
-              </button>
-            </div>
-          )}
         </div>
 
         <table
