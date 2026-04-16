@@ -27,13 +27,13 @@ class LoginComponent extends Component {
         .then((res) => {
           this.handleSuccessLogin(res.data, "customer");
         })
-        .catch((errCustomer) => {
+        .catch(() => {
           axios
             .post("https://dingzcomputer.onrender.com/api/admin/login", body)
             .then((resAdmin) => {
               this.handleSuccessLogin(resAdmin.data, "admin");
             })
-            .catch((errAdmin) => {
+            .catch(() => {
               toast.error("Sai tên đăng nhập hoặc mật khẩu!");
             });
         });
@@ -57,7 +57,7 @@ class LoginComponent extends Component {
 
       setTimeout(() => {
         if (role === "admin") {
-          window.location.href = `https://dingzadmin.onrender.com/admin/home?token=${token}`;
+          window.location.href = `https://dingz-computer.vercel.app/admin/home?token=${token}`;
         } else {
           window.location.href = "/home";
         }
