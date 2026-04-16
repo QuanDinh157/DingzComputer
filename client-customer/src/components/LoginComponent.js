@@ -57,8 +57,6 @@ class LoginComponent extends Component {
 
       setTimeout(() => {
         if (role === "admin") {
-          const currentPort = window.location.port;
-          const adminPort = currentPort === "3000" ? "3001" : "3000";
           window.location.href = `https://dingzadmin.onrender.com/admin/home?token=${token}`;
         } else {
           window.location.href = "/home";
