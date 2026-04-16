@@ -1,7 +1,6 @@
-const { Resend } = require("resend");
+const sgMail = require("@sendgrid/mail");
 
-// Khởi tạo Resend với API Key lấy từ file .env
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
   try {
@@ -11,7 +10,6 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
     let color = "#0d47a1";
     const orderIdShort = order._id.toString().slice(-6).toUpperCase();
 
-    // Logic trạng thái y hệt đêm qua
     switch (status) {
       case "shipping":
         subject = `[Dingz Computer] Đơn hàng #${orderIdShort} đang được giao`;
@@ -59,9 +57,9 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
 
     const finalPrice = order.totalPrice || order.total || 0;
 
-    const { data, error } = await resend.emails.send({
-      from: "Dingz Computer <onboarding@resend.dev>",
-      to: emailTo,
+    const msg = {
+      to: emailTo, // Gửi tới email khách thật (lachongquan12...)
+      from: "dingzcraft157@gmail.com", // BẮT BUỘC dùng mail ông đã Verify trên SendGrid
       subject: subject,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -91,20 +89,22 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
               <p style="margin: 5px 0 0 0; font-size: 22px; font-weight: bold; color: ${color};">${finalPrice.toLocaleString("vi-VN")} VNĐ</p>
             </div>
           </div>
+          <div style="background-color: #f9f9f9; padding: 20px; text-align: center; color: #888; font-size: 12px;">
+            <p>Đây là email tự động từ hệ thống Dingz Computer. Vui lòng không phản hồi email này.</p>
+          </div>
         </div>
       `,
-    });
+    };
 
-    if (error) {
-      console.error("=> Lỗi từ Resend:", error);
-    } else {
-      console.log(
-        `=> [THÀNH CÔNG] Mail trạng thái [${status}] đã gửi! ID:`,
-        data.id,
-      );
-    }
+    await sgMail.send(msg);
+    console.log(
+      `=> [THÀNH CÔNG] SendGrid đã gửi mail [${status}] tới: ${emailTo}`,
+    );
   } catch (error) {
-    console.error("Lỗi gửi mail catch:", error);
+    console.error(
+      "=> Lỗi gửi mail SendGrid:",
+      error.response ? error.response.body : error.message,
+    );
   }
 };
 
