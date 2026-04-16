@@ -24,6 +24,7 @@ class OrderComponent extends Component {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
+
       .get("https://dingzcomputer.onrender.com/api/orders", config)
       .then((res) => {
         let fetchedOrders = [];
@@ -53,7 +54,7 @@ class OrderComponent extends Component {
 
     axios
       .put(
-        `https://dingzcomputer.onrender.com/api/orders/status/${id}`,
+        `https://dingzcomputer.onrender.com/api/orders/${id}/status`,
         { status },
         config,
       )
