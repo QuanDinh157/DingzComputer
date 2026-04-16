@@ -10,7 +10,11 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
     let color = "#0d47a1";
     const orderIdShort = order._id.toString().slice(-6).toUpperCase();
 
-    switch (status) {
+    const currentStatus = status ? status.toLowerCase() : "new";
+
+    switch (currentStatus) {
+      case "processing":
+      case "shipped":
       case "shipping":
         subject = `[Dingz Computer] Đơn hàng #${orderIdShort} đang được giao`;
         statusText =
@@ -18,13 +22,15 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
         statusLabel = "Đang giao hàng";
         color = "#e67e22";
         break;
+
       case "cancelled":
         subject = `[Dingz Computer] Thông báo hủy đơn hàng #${orderIdShort}`;
         statusText =
-          "Rất tiếc, đơn hàng của bạn đã bị hủy. Nếu có thắc mắc, vui lòng liên hệ hotline.";
+          "Đã hủy đơn hàng. Nếu có thắc mắc, vui lòng liên hệ hotline.";
         statusLabel = "Đã hủy";
         color = "#d32f2f";
         break;
+
       case "completed":
         subject = `[Dingz Computer] Đơn hàng #${orderIdShort} đã hoàn thành`;
         statusText =
@@ -32,6 +38,7 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
         statusLabel = "Đã hoàn thành";
         color = "#2e7d32";
         break;
+
       default:
         subject = `[Dingz Computer] Xác nhận đặt hàng #${orderIdShort} thành công`;
         statusText =
@@ -58,8 +65,8 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
     const finalPrice = order.totalPrice || order.total || 0;
 
     const msg = {
-      to: emailTo, // Gửi tới email khách thật (lachongquan12...)
-      from: "dingzcraft157@gmail.com", // BẮT BUỘC dùng mail ông đã Verify trên SendGrid
+      to: emailTo,
+      from: "dingzcraft157@gmail.com",
       subject: subject,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -97,9 +104,7 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
     };
 
     await sgMail.send(msg);
-    console.log(
-      `=> [THÀNH CÔNG] SendGrid đã gửi mail [${status}] tới: ${emailTo}`,
-    );
+    console.log(`=> [THÀNH CÔNG] Mail [${currentStatus}] gửi tới: ${emailTo}`);
   } catch (error) {
     console.error(
       "=> Lỗi gửi mail SendGrid:",
