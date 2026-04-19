@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { addOrderItems } = require("../controllers/orderController");
+const {
+  addOrderItems,
+  confirmBankTransfer,
+} = require("../controllers/orderController");
 const { protect, admin } = require("../middleware/authMiddleware");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
@@ -40,7 +43,7 @@ router.get("/", protect, admin, async (req, res) => {
 
 router.put("/:id/status", protect, admin, async (req, res) => {
   try {
-    const { status } = req.body; // shipping hoặc cancelled
+    const { status } = req.body;
     const order = await Order.findById(req.params.id).populate(
       "user",
       "name email",
@@ -76,5 +79,7 @@ router.put("/:id/status", protect, admin, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+router.put("/:id/pay-confirm", protect, confirmBankTransfer);
 
 module.exports = router;

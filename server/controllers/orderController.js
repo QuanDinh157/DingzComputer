@@ -48,12 +48,14 @@ const addOrderItems = async (req, res) => {
 
     const createdOrder = await order.save();
 
-    sendOrderEmail(
-      email || req.user.email,
-      createdOrder,
-      customerName || req.user.name,
-      "new",
-    ).catch((err) => console.error("Lỗi gửi mail tạo đơn:", err.message));
+    if (!paymentMethod || paymentMethod === "COD") {
+      sendOrderEmail(
+        email || req.user.email,
+        createdOrder,
+        customerName || req.user.name,
+        "new",
+      ).catch((err) => console.error("Lỗi gửi mail tạo đơn:", err.message));
+    }
 
     res.status(201).json(createdOrder);
   } catch (error) {
@@ -99,15 +101,25 @@ const updateOrderStatus = async (req, res) => {
 
 const confirmBankTransfer = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate(
+      "user",
+      "name email",
+    );
 
     if (order) {
       order.isPaid = true;
       order.paidAt = Date.now();
-      order.paymentMethod = "VietQR_BIDV";
-      order.status = "processing";
+      order.paymentMethod = "VietQR";
+      order.status = "PROCESSING";
 
       const updatedOrder = await order.save();
+
+      const emailKhach = order.user ? order.user.email : "khachhang@gmail.com";
+      const tenKhach = order.user ? order.user.name : "Quý khách";
+
+      sendOrderEmail(emailKhach, updatedOrder, tenKhach, "new").catch((err) =>
+        console.error("Lỗi gửi mail xác nhận VietQR:", err.message),
+      );
 
       res.status(200).json(updatedOrder);
     } else {
@@ -118,4 +130,4 @@ const confirmBankTransfer = async (req, res) => {
   }
 };
 
-module.exports = { addOrderItems, updateOrderStatus };
+module.exports = { addOrderItems, updateOrderStatus, confirmBankTransfer };
