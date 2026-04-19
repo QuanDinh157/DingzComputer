@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import MyContext from "../contexts/MyContext";
 import axios from "axios";
 import Swal from "sweetalert2";
+import VietQRPaymentComponent from "./VietQRPaymentComponent";
 
 class CheckoutComponent extends Component {
   static contextType = MyContext;
@@ -13,6 +14,7 @@ class CheckoutComponent extends Component {
       phone: "",
       city: "TP. Hồ Chí Minh",
       isReady: false,
+      createdOrder: null,
     };
   }
 
@@ -78,14 +80,14 @@ class CheckoutComponent extends Component {
       .then((res) => {
         if (res.data) {
           Swal.fire({
-            title: "THÀNH CÔNG",
-            text: "Đơn hàng của bạn đã được ghi nhận!",
+            title: "ĐẶT HÀNG THÀNH CÔNG",
+            text: "Vui lòng tiến hành thanh toán để hoàn tất đơn hàng!",
             icon: "success",
             confirmButtonColor: "#ed1c24",
           }).then(() => {
             this.context.setMycart([]);
             localStorage.removeItem("mycart");
-            window.location.href = "/home";
+            this.setState({ createdOrder: res.data });
           });
         }
       })
@@ -97,8 +99,17 @@ class CheckoutComponent extends Component {
 
   render() {
     const { mycart, user } = this.context;
-    const { isReady } = this.state;
+    const { isReady, createdOrder } = this.state;
+
     if (!isReady) return <div className="p-loading">ĐANG TẢI...</div>;
+
+    if (createdOrder) {
+      return (
+        <div className="checkout-page-wrapper">
+          <VietQRPaymentComponent order={createdOrder} />
+        </div>
+      );
+    }
 
     const total = mycart.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
