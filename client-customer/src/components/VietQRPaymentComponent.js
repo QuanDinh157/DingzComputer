@@ -8,7 +8,8 @@ const VietQRPaymentComponent = ({ order, token }) => {
 
   const BANK_ID = "BIDV";
   const ACCOUNT_NO = "1170303639";
-  const ACCOUNT_NAME = "DINH NGUYEN QUOC QUAN";
+  const ACCOUNT_NAME_QR = "DINH NGUYEN QUOC QUAN"; // Tên chuẩn để quét QR không lỗi
+  const DISPLAY_NAME = "Dingz Computer"; // Tên hiển thị trên giao diện cho chuyên nghiệp
 
   const amount = order.totalPrice;
   const orderId = order._id
@@ -18,7 +19,7 @@ const VietQRPaymentComponent = ({ order, token }) => {
   const customerPhone = order.shippingAddress?.phone || "N/A";
 
   const addInfo = `DINGZ ${orderId} ${customerPhone.slice(-4)}`;
-  const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${ACCOUNT_NAME}`;
+  const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${ACCOUNT_NAME_QR}`;
 
   const handleProcessPayment = () => {
     if (!isConfirmed) {
@@ -46,19 +47,16 @@ const VietQRPaymentComponent = ({ order, token }) => {
       if (result.isConfirmed) {
         try {
           setLoading(true);
-
           const config = {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           };
-
           await axios.put(
             `https://dingzcomputer.onrender.com/api/orders/${order._id}/pay-confirm`,
             {},
             config,
           );
-
           Swal.fire({
             title: "THÔNG BÁO",
             text: "Yêu cầu của bạn đã được gửi tới bộ phận kế toán. Đơn hàng sẽ được duyệt ngay khi nhận được tiền.",
@@ -98,6 +96,8 @@ const VietQRPaymentComponent = ({ order, token }) => {
           padding: "25px",
           textAlign: "center",
           color: "#fff",
+          borderTopLeftRadius: "16px",
+          borderTopRightRadius: "16px",
         }}
       >
         <h2
@@ -111,7 +111,7 @@ const VietQRPaymentComponent = ({ order, token }) => {
           HỆ THỐNG THANH TOÁN VIETQR
         </h2>
         <p style={{ margin: "8px 0 0", fontSize: "14px", opacity: 0.9 }}>
-          Dingz Computer - An toàn & Bảo mật
+          {DISPLAY_NAME} - An toàn & Bảo mật
         </p>
       </div>
 
@@ -176,7 +176,7 @@ const VietQRPaymentComponent = ({ order, token }) => {
           >
             <img
               src={qrUrl}
-              alt="QR Thanh Toán"
+              alt="QR"
               style={{ width: "220px", height: "220px", display: "block" }}
             />
           </div>
@@ -200,12 +200,12 @@ const VietQRPaymentComponent = ({ order, token }) => {
             }}
           >
             <span style={{ fontSize: "14px", color: "#666" }}>
-              Ngân hàng thụ hưởng:
+              Đơn vị thụ hưởng:
             </span>
             <span
               style={{ fontSize: "14px", fontWeight: "700", color: "#10526e" }}
             >
-              BIDV
+              {DISPLAY_NAME}
             </span>
           </div>
           <div
@@ -278,8 +278,7 @@ const VietQRPaymentComponent = ({ order, token }) => {
               lineHeight: "1.4",
             }}
           >
-            Tôi xác nhận đã chuyển khoản đúng số tiền và nội dung như thông tin
-            ở trên.
+            Tôi xác nhận đã chuyển khoản đúng số tiền và nội dung như trên.
           </label>
         </div>
 
@@ -296,7 +295,6 @@ const VietQRPaymentComponent = ({ order, token }) => {
             fontSize: "16px",
             fontWeight: "600",
             cursor: isConfirmed ? "pointer" : "not-allowed",
-            transition: "all 0.3s",
           }}
         >
           {loading ? "ĐANG XỬ LÝ HỆ THỐNG..." : "XÁC NHẬN HOÀN TẤT THANH TOÁN"}
@@ -311,9 +309,11 @@ const VietQRPaymentComponent = ({ order, token }) => {
           fontSize: "12px",
           color: "#999",
           borderTop: "1px solid #eee",
+          borderBottomLeftRadius: "16px",
+          borderBottomRightRadius: "16px",
         }}
       >
-        Mọi thắc mắc vui lòng liên hệ Hotline: 0902876722
+        Hotline hỗ trợ: 0902876722
       </div>
     </div>
   );

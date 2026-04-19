@@ -67,7 +67,7 @@ class CheckoutComponent extends Component {
         0,
       ),
       email: user.email,
-      customerName: user.name,
+      customerName: user.name || "Khách hàng Dingz",
     };
 
     const config = {
@@ -143,7 +143,7 @@ class CheckoutComponent extends Component {
                   <label>Họ và tên khách hàng</label>
                   <input
                     type="text"
-                    value={user?.name || ""}
+                    value={user?.name || "Khách hàng"}
                     readOnly
                     className="input-locked"
                   />
@@ -178,21 +178,9 @@ class CheckoutComponent extends Component {
                   >
                     <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
                     <option value="Hà Nội">Hà Nội</option>
-                    <option value="An Giang">An Giang</option>
-                    <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
-                    <option value="Bắc Ninh">Bắc Ninh</option>
-                    <option value="Bình Dương">Bình Dương</option>
-                    <option value="Bình Định">Bình Định</option>
-                    <option value="Cần Thơ">Cần Thơ</option>
                     <option value="Đà Nẵng">Đà Nẵng</option>
-                    <option value="Đồng Nai">Đồng Nai</option>
+                    <option value="Cần Thơ">Cần Thơ</option>
                     <option value="Hải Phòng">Hải Phòng</option>
-                    <option value="Khánh Hòa">Khánh Hòa</option>
-                    <option value="Lâm Đồng">Lâm Đồng</option>
-                    <option value="Long An">Long An</option>
-                    <option value="Quảng Ninh">Quảng Ninh</option>
-                    <option value="Tây Ninh">Tây Ninh</option>
-                    <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
                   </select>
                 </div>
               </div>
@@ -236,10 +224,9 @@ class CheckoutComponent extends Component {
                         this.state.paymentMethod === "COD" ? "bold" : "normal",
                     }}
                   >
-                    Thanh toán khi nhận hàng (COD)
+                    💵 Thanh toán khi nhận hàng (COD)
                   </span>
                 </label>
-
                 <label
                   style={{
                     display: "flex",
@@ -269,7 +256,7 @@ class CheckoutComponent extends Component {
                       color: "#0d47a1",
                     }}
                   >
-                    Chuyển khoản qua App Ngân Hàng (VietQR)
+                    📱 Chuyển khoản qua App Ngân Hàng (VietQR)
                   </span>
                 </label>
               </div>
@@ -312,7 +299,6 @@ class CheckoutComponent extends Component {
                   <span>TỔNG CỘNG</span>
                   <span className="final-val">{total.toLocaleString()}₫</span>
                 </div>
-
                 <button
                   className="btn-final-checkout"
                   onClick={this.btnConfirmOrderClick}
