@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const VietQRPaymentComponent = ({ order }) => {
+const VietQRPaymentComponent = ({ order, token }) => {
   const [loading, setLoading] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -46,8 +46,17 @@ const VietQRPaymentComponent = ({ order }) => {
       if (result.isConfirmed) {
         try {
           setLoading(true);
+
+          const config = {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          };
+
           await axios.put(
             `https://dingzcomputer.onrender.com/api/orders/${order._id}/pay-confirm`,
+            {},
+            config,
           );
 
           Swal.fire({
@@ -304,7 +313,7 @@ const VietQRPaymentComponent = ({ order }) => {
           borderTop: "1px solid #eee",
         }}
       >
-        Mọi thắc mắc vui lòng liên hệ Hotline: 1900 xxxx
+        Mọi thắc mắc vui lòng liên hệ Hotline: 0902876722
       </div>
     </div>
   );

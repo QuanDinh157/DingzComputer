@@ -13,6 +13,7 @@ class CheckoutComponent extends Component {
       address: "",
       phone: "",
       city: "TP. Hồ Chí Minh",
+      paymentMethod: "COD",
       isReady: false,
       createdOrder: null,
     };
@@ -40,7 +41,7 @@ class CheckoutComponent extends Component {
   btnConfirmOrderClick = (e) => {
     e.preventDefault();
     const { mycart, token, user } = this.context;
-    const { address, phone, city } = this.state;
+    const { address, phone, city, paymentMethod } = this.state;
 
     if (!address.trim() || !phone.trim()) {
       Swal.fire(
@@ -60,6 +61,7 @@ class CheckoutComponent extends Component {
         product: item.product._id,
       })),
       shippingAddress: { address, city, phone },
+      paymentMethod: paymentMethod,
       totalPrice: mycart.reduce(
         (sum, item) => sum + item.product.price * item.quantity,
         0,
@@ -79,16 +81,29 @@ class CheckoutComponent extends Component {
       .post("https://dingzcomputer.onrender.com/api/orders", orderData, config)
       .then((res) => {
         if (res.data) {
-          Swal.fire({
-            title: "ĐẶT HÀNG THÀNH CÔNG",
-            text: "Vui lòng tiến hành thanh toán để hoàn tất đơn hàng!",
-            icon: "success",
-            confirmButtonColor: "#ed1c24",
-          }).then(() => {
-            this.context.setMycart([]);
-            localStorage.removeItem("mycart");
-            this.setState({ createdOrder: res.data });
-          });
+          if (paymentMethod === "VietQR") {
+            Swal.fire({
+              title: "ĐẶT HÀNG THÀNH CÔNG",
+              text: "Vui lòng tiến hành chuyển khoản để hoàn tất đơn hàng!",
+              icon: "success",
+              confirmButtonColor: "#0d47a1",
+            }).then(() => {
+              this.context.setMycart([]);
+              localStorage.removeItem("mycart");
+              this.setState({ createdOrder: res.data });
+            });
+          } else {
+            Swal.fire({
+              title: "ĐẶT HÀNG THÀNH CÔNG",
+              text: "Cảm ơn bạn! Hàng sẽ được giao và thanh toán tại nhà.",
+              icon: "success",
+              confirmButtonColor: "#2e7d32",
+            }).then(() => {
+              this.context.setMycart([]);
+              localStorage.removeItem("mycart");
+              window.location.href = "/home";
+            });
+          }
         }
       })
       .catch((err) => {
@@ -98,15 +113,15 @@ class CheckoutComponent extends Component {
   };
 
   render() {
-    const { mycart, user } = this.context;
-    const { isReady, createdOrder } = this.state;
+    const { mycart, user, token } = this.context;
+    const { isReady, createdOrder, paymentMethod } = this.state;
 
     if (!isReady) return <div className="p-loading">ĐANG TẢI...</div>;
 
-    if (createdOrder) {
+    if (createdOrder && paymentMethod === "VietQR") {
       return (
         <div className="checkout-page-wrapper">
-          <VietQRPaymentComponent order={createdOrder} />
+          <VietQRPaymentComponent order={createdOrder} token={token} />
         </div>
       );
     }
@@ -150,7 +165,7 @@ class CheckoutComponent extends Component {
                     value={this.state.address}
                     onChange={this.handleInputChange}
                     placeholder="Số nhà, tên đường..."
-                    rows="4"
+                    rows="3"
                   ></textarea>
                 </div>
                 <div className="form-group-item">
@@ -181,10 +196,87 @@ class CheckoutComponent extends Component {
                   </select>
                 </div>
               </div>
+
+              <h3 className="section-title mt-4" style={{ marginTop: "30px" }}>
+                2. PHƯƠNG THỨC THANH TOÁN
+              </h3>
+              <div
+                className="checkout-form"
+                style={{
+                  padding: "15px",
+                  background: "#f9f9f9",
+                  borderRadius: "8px",
+                  border: "1px solid #ddd",
+                }}
+              >
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={this.state.paymentMethod === "COD"}
+                    onChange={this.handleInputChange}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      marginRight: "10px",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight:
+                        this.state.paymentMethod === "COD" ? "bold" : "normal",
+                    }}
+                  >
+                    💵 Thanh toán khi nhận hàng (COD)
+                  </span>
+                </label>
+
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="VietQR"
+                    checked={this.state.paymentMethod === "VietQR"}
+                    onChange={this.handleInputChange}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      marginRight: "10px",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight:
+                        this.state.paymentMethod === "VietQR"
+                          ? "bold"
+                          : "normal",
+                      color: "#0d47a1",
+                    }}
+                  >
+                    📱 Chuyển khoản qua App Ngân Hàng (VietQR)
+                  </span>
+                </label>
+              </div>
             </div>
 
             <div className="checkout-summary-section">
-              <h3 className="section-title">2. CHI TIẾT ĐƠN HÀNG</h3>
+              <h3 className="section-title">3. CHI TIẾT ĐƠN HÀNG</h3>
               <div className="summary-list">
                 {mycart.map((item, index) => (
                   <div key={index} className="summary-product-item">
@@ -220,11 +312,14 @@ class CheckoutComponent extends Component {
                   <span>TỔNG CỘNG</span>
                   <span className="final-val">{total.toLocaleString()}₫</span>
                 </div>
+
                 <button
                   className="btn-final-checkout"
                   onClick={this.btnConfirmOrderClick}
                 >
-                  XÁC NHẬN ĐẶT HÀNG
+                  {this.state.paymentMethod === "VietQR"
+                    ? "ĐẶT HÀNG & CHUYỂN KHOẢN"
+                    : "XÁC NHẬN ĐẶT HÀNG"}
                 </button>
               </div>
             </div>
