@@ -236,7 +236,7 @@ class CheckoutComponent extends Component {
                         this.state.paymentMethod === "COD" ? "bold" : "normal",
                     }}
                   >
-                    💵 Thanh toán khi nhận hàng (COD)
+                    Thanh toán khi nhận hàng (COD)
                   </span>
                 </label>
 
@@ -269,7 +269,7 @@ class CheckoutComponent extends Component {
                       color: "#0d47a1",
                     }}
                   >
-                    📱 Chuyển khoản qua App Ngân Hàng (VietQR)
+                    Chuyển khoản qua App Ngân Hàng (VietQR)
                   </span>
                 </label>
               </div>

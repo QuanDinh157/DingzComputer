@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema(
     totalPrice: { type: Number, required: true, default: 0.0 },
     paymentMethod: {
       type: String,
-      enum: ["COD", "VIETQR"],
+      enum: ["COD", "VietQR"],
       required: true,
       default: "COD",
     },

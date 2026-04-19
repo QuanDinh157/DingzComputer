@@ -38,13 +38,13 @@ class FooterComponent extends Component {
             <h4>TỔNG ĐÀI HỖ TRỢ</h4>
             <div className="contact-info">
               <p>
-                <strong>📞 Mua hàng:</strong> 0902876722 (8:00 - 21:00)
+                <strong>SĐT Mua hàng:</strong> 0902876722 (8:00 - 21:00)
               </p>
               <p>
-                <strong>📞 Bảo hành:</strong> 0909169633 (8:30 - 17:30)
+                <strong>SĐT Bảo hành:</strong> 0909169633 (8:30 - 17:30)
               </p>
               <p>
-                <strong>Email:</strong> lachongquan12@gmail.com
+                <strong>Email:</strong> dingzcraft157@gmail.com
               </p>
             </div>
           </div>
