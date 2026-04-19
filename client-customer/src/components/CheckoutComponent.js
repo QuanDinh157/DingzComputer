@@ -10,6 +10,7 @@ class CheckoutComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      name: "",
       address: "",
       phone: "",
       city: "TP. Hồ Chí Minh",
@@ -24,6 +25,7 @@ class CheckoutComponent extends Component {
       const { user } = this.context;
       if (user) {
         this.setState({
+          name: user.name || user.username || user.fullname || "",
           phone: user.phone || "",
           address: user.address || "",
           isReady: true,
@@ -41,9 +43,9 @@ class CheckoutComponent extends Component {
   btnConfirmOrderClick = (e) => {
     e.preventDefault();
     const { mycart, token, user } = this.context;
-    const { address, phone, city, paymentMethod } = this.state;
+    const { name, address, phone, city, paymentMethod } = this.state;
 
-    if (!address.trim() || !phone.trim()) {
+    if (!address.trim() || !phone.trim() || !name.trim()) {
       Swal.fire(
         "THÔNG BÁO",
         "Vui lòng hoàn thiện thông tin giao hàng!",
@@ -67,7 +69,7 @@ class CheckoutComponent extends Component {
         0,
       ),
       email: user.email,
-      customerName: user.name || "Khách hàng Dingz",
+      customerName: name,
     };
 
     const config = {
@@ -82,16 +84,9 @@ class CheckoutComponent extends Component {
       .then((res) => {
         if (res.data) {
           if (paymentMethod === "VietQR") {
-            Swal.fire({
-              title: "ĐẶT HÀNG THÀNH CÔNG",
-              text: "Vui lòng tiến hành chuyển khoản để hoàn tất đơn hàng!",
-              icon: "success",
-              confirmButtonColor: "#0d47a1",
-            }).then(() => {
-              this.context.setMycart([]);
-              localStorage.removeItem("mycart");
-              this.setState({ createdOrder: res.data });
-            });
+            this.context.setMycart([]);
+            localStorage.removeItem("mycart");
+            this.setState({ createdOrder: res.data });
           } else {
             Swal.fire({
               title: "ĐẶT HÀNG THÀNH CÔNG",
@@ -113,7 +108,7 @@ class CheckoutComponent extends Component {
   };
 
   render() {
-    const { mycart, user, token } = this.context;
+    const { mycart, token } = this.context;
     const { isReady, createdOrder, paymentMethod } = this.state;
 
     if (!isReady) return <div className="p-loading">ĐANG TẢI...</div>;
@@ -143,9 +138,10 @@ class CheckoutComponent extends Component {
                   <label>Họ và tên khách hàng</label>
                   <input
                     type="text"
-                    value={user?.name || "Khách hàng"}
-                    readOnly
-                    className="input-locked"
+                    name="name"
+                    value={this.state.name}
+                    onChange={this.handleInputChange}
+                    placeholder="Nhập họ và tên..."
                   />
                 </div>
                 <div className="form-group-item">
@@ -224,7 +220,7 @@ class CheckoutComponent extends Component {
                         this.state.paymentMethod === "COD" ? "bold" : "normal",
                     }}
                   >
-                    💵 Thanh toán khi nhận hàng (COD)
+                    Thanh toán khi nhận hàng (COD)
                   </span>
                 </label>
                 <label
@@ -256,7 +252,7 @@ class CheckoutComponent extends Component {
                       color: "#0d47a1",
                     }}
                   >
-                    📱 Chuyển khoản qua App Ngân Hàng (VietQR)
+                    Chuyển khoản qua App Ngân Hàng (VietQR)
                   </span>
                 </label>
               </div>
