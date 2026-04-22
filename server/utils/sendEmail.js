@@ -13,9 +13,18 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
     const currentStatus = status ? status.toLowerCase() : "new";
 
     switch (currentStatus) {
+      // 1. TRẠNG THÁI KHÁCH VỪA QUÉT MÃ QR XONG (CHỜ KIỂM TRA TIỀN)
       case "processing":
-      case "shipped":
+        subject = `[Dingz Computer] Tiếp nhận yêu cầu chuyển khoản đơn #${orderIdShort}`;
+        statusText =
+          "Hệ thống đã ghi nhận thông báo chuyển khoản của bạn. Bộ phận kế toán đang tiến hành đối soát số dư.";
+        statusLabel = "Đang chờ kế toán đối soát";
+        color = "#f39c12"; // Màu vàng cam cho việc "Chờ đợi"
+        break;
+
+      // 2. TRẠNG THÁI ADMIN BẤM GIAO HÀNG
       case "shipping":
+      case "shipped":
         subject = `[Dingz Computer] Đơn hàng #${orderIdShort} đang được giao`;
         statusText =
           "Đơn hàng của bạn đã được bàn giao cho đơn vị vận chuyển và đang trên đường đến tay bạn!";
@@ -23,6 +32,7 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
         color = "#e67e22";
         break;
 
+      // 3. TRẠNG THÁI HỦY ĐƠN
       case "cancelled":
         subject = `[Dingz Computer] Thông báo hủy đơn hàng #${orderIdShort}`;
         statusText =
@@ -31,6 +41,7 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
         color = "#d32f2f";
         break;
 
+      // 4. TRẠNG THÁI GIAO HÀNG THÀNH CÔNG
       case "completed":
         subject = `[Dingz Computer] Đơn hàng #${orderIdShort} đã hoàn thành`;
         statusText =
@@ -39,11 +50,12 @@ const sendOrderEmail = async (emailTo, order, customerName, status = "new") => {
         color = "#2e7d32";
         break;
 
+      // 5. TRẠNG THÁI TẠO ĐƠN COD (MẶC ĐỊNH LÀ NEW)
       default:
         subject = `[Dingz Computer] Xác nhận đặt hàng #${orderIdShort} thành công`;
         statusText =
-          "Cảm ơn bạn đã đặt hàng. Hệ thống đã tiếp nhận đơn hàng của bạn.";
-        statusLabel = "Đã xác nhận";
+          "Cảm ơn bạn đã đặt hàng. Hệ thống đã tiếp nhận đơn hàng của bạn (Thanh toán khi nhận hàng).";
+        statusLabel = "Chờ xác nhận giao hàng";
         color = "#0d47a1";
     }
 

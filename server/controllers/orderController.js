@@ -74,7 +74,8 @@ const updateOrderStatus = async (req, res) => {
       order.status = req.body.status;
       const updatedOrder = await order.save();
 
-      if (req.body.status === "shipping" || req.body.status === "cancelled") {
+      // ĐÃ SỬA THÀNH CHỮ IN HOA CHO KHỚP VỚI FRONTEND ADMIN NÈ SẾP
+      if (req.body.status === "SHIPPED" || req.body.status === "CANCELLED") {
         const emailKhach = order.user
           ? order.user.email
           : "khachhang@gmail.com";
@@ -117,8 +118,8 @@ const confirmBankTransfer = async (req, res) => {
       const emailKhach = order.user ? order.user.email : "khachhang@gmail.com";
       const tenKhach = order.user ? order.user.name : "Quý khách";
 
-      sendOrderEmail(emailKhach, updatedOrder, tenKhach, "new").catch((err) =>
-        console.error("Lỗi gửi mail xác nhận VietQR:", err.message),
+      sendOrderEmail(emailKhach, updatedOrder, tenKhach, "processing").catch(
+        (err) => console.error("Lỗi gửi mail xác nhận VietQR:", err.message),
       );
 
       res.status(200).json(updatedOrder);

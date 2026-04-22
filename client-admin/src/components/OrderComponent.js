@@ -24,7 +24,6 @@ class OrderComponent extends Component {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
-
       .get("https://dingzcomputer.onrender.com/api/orders", config)
       .then((res) => {
         let fetchedOrders = [];
@@ -110,6 +109,20 @@ class OrderComponent extends Component {
               </td>
               <td>{new Date(item.createdAt).toLocaleString("vi-VN")}</td>
               <td>{item.user?.name || "Khách hàng"}</td>
+
+              {/* CỘT PHƯƠNG THỨC THANH TOÁN (MỚI THÊM) */}
+              <td>
+                <span
+                  style={{
+                    fontWeight: "600",
+                    color:
+                      item.paymentMethod === "VietQR" ? "#0d47a1" : "#2e7d32",
+                  }}
+                >
+                  {item.paymentMethod === "VietQR" ? "📱 VietQR" : "💵 COD"}
+                </span>
+              </td>
+
               <td style={{ fontWeight: "bold" }}>
                 {item.totalPrice.toLocaleString()} VNĐ
               </td>
@@ -170,6 +183,7 @@ class OrderComponent extends Component {
                     <th style={{ padding: "15px" }}>ID</th>
                     <th>Ngày đặt</th>
                     <th>Khách hàng</th>
+                    <th>Thanh toán</th>
                     <th>Tổng tiền</th>
                     <th>Trạng thái</th>
                   </tr>
@@ -180,7 +194,7 @@ class OrderComponent extends Component {
                   ) : (
                     <tr>
                       <td
-                        colSpan="5"
+                        colSpan="6"
                         style={{ padding: "30px", color: "#888" }}
                       >
                         {loading
@@ -218,6 +232,25 @@ class OrderComponent extends Component {
 
               <div
                 style={{
+                  padding: "10px",
+                  background: "#f5f5f5",
+                  borderRadius: "5px",
+                  marginBottom: "15px",
+                }}
+              >
+                <strong>Lưu ý: </strong>
+                {itemSelected.paymentMethod === "VietQR" ? (
+                  <span style={{ color: "#d32f2f" }}>
+                    Đây là đơn chuyển khoản. Hãy kiểm tra App ngân hàng trước
+                    khi bấm Giao hàng!
+                  </span>
+                ) : (
+                  <span>Đây là đơn COD. Có thể xác nhận và giao ngay.</span>
+                )}
+              </div>
+
+              <div
+                style={{
                   display: "flex",
                   flexWrap: "wrap",
                   gap: "10px",
@@ -240,7 +273,7 @@ class OrderComponent extends Component {
                       cursor: "pointer",
                     }}
                   >
-                    XÁC NHẬN ĐƠN
+                    XÁC NHẬN ĐƠN (COD)
                   </button>
                 )}
 
@@ -260,7 +293,7 @@ class OrderComponent extends Component {
                       cursor: "pointer",
                     }}
                   >
-                    GIAO HÀNG
+                    ĐÃ KIỂM TRA & GIAO HÀNG
                   </button>
                 )}
 
