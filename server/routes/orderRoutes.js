@@ -41,6 +41,19 @@ router.get("/", protect, admin, async (req, res) => {
   }
 });
 
+// 📌 [MỚI THÊM] API: LẤY TẤT CẢ ĐƠN HÀNG CỦA 1 KHÁCH HÀNG BẤT KỲ
+router.get("/customer/:cid", protect, admin, async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.params.cid })
+      .populate("user", "name email phone")
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 📌 [ĐÃ FIX] CHUẨN HÓA LẠI CHỮ IN HOA "CANCELLED" VÀ "SHIPPED"
 router.put("/:id/status", protect, admin, async (req, res) => {
   try {
     const { status } = req.body;
@@ -53,7 +66,8 @@ router.put("/:id/status", protect, admin, async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
-    if (status === "cancelled" && order.status !== "cancelled") {
+    // Nếu trạng thái gửi lên là CANCELLED thì tiến hành hoàn kho
+    if (status === "CANCELLED" && order.status !== "CANCELLED") {
       for (let i = 0; i < order.orderItems.length; i++) {
         const item = order.orderItems[i];
         const productInDb = await Product.findById(item.product);

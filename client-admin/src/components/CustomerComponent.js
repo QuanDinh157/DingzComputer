@@ -16,8 +16,8 @@ class CustomerComponent extends Component {
   }
 
   apiGetCustomers() {
-    const token = localStorage.getItem("token"); // Đổi sang xài localStorage
-    const config = { headers: { "x-access-token": token } };
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
     axios
       .get("https://dingzcomputer.onrender.com/api/admin/customers", config)
       .then((res) => {
@@ -32,15 +32,25 @@ class CustomerComponent extends Component {
   }
 
   apiGetOrdersByCustID(cid) {
-    const token = localStorage.getItem("token"); // Đổi sang xài localStorage
-    const config = { headers: { "x-access-token": token } };
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+
+    // ĐÃ XÓA CHỮ "admin/" Ở ĐÂY RỒI NÈ SẾP
     axios
       .get(
-        "https://dingzcomputer.onrender.com/api/admin/orders/customer/" + cid,
+        "https://dingzcomputer.onrender.com/api/orders/customer/" + cid,
         config,
       )
       .then((res) => {
-        this.setState({ orders: res.data });
+        let fetchedOrders = [];
+        if (Array.isArray(res.data)) {
+          fetchedOrders = res.data;
+        } else if (res.data && Array.isArray(res.data.orders)) {
+          fetchedOrders = res.data.orders;
+        } else if (res.data && Array.isArray(res.data.data)) {
+          fetchedOrders = res.data.data;
+        }
+        this.setState({ orders: fetchedOrders });
       })
       .catch((err) => console.log(err.message));
   }
@@ -56,6 +66,8 @@ class CustomerComponent extends Component {
             borderBottom: "1px solid #eee",
             textAlign: "center",
             height: "50px",
+            backgroundColor:
+              this.state.customer?._id === item._id ? "#f0f7ff" : "white",
           }}
         >
           <td>{item._id.substring(0, 5)}...</td>
@@ -77,6 +89,11 @@ class CustomerComponent extends Component {
     });
 
     const orders = this.state.orders.map((item) => {
+      const orderDate = item.createdAt || item.cdate;
+      const totalAmount = item.totalPrice || item.total || 0;
+      const customerName =
+        item.user?.name || this.state.customer?.name || "Khách hàng";
+
       return (
         <tr
           key={item._id}
@@ -86,13 +103,46 @@ class CustomerComponent extends Component {
             height: "50px",
           }}
         >
-          <td>{item._id.substring(0, 5)}</td>
-          <td>{new Date(item.cdate).toLocaleString()}</td>
-          <td>{item.customer.name}</td>
-          <td style={{ fontWeight: "bold" }}>
-            {item.total.toLocaleString("vi-VN")} VNĐ
+          <td>{item._id.substring(0, 5)}...</td>
+          <td>
+            {orderDate ? new Date(orderDate).toLocaleString("vi-VN") : "N/A"}
           </td>
-          <td>{item.status}</td>
+          <td>{customerName}</td>
+          <td style={{ fontWeight: "bold" }}>
+            {totalAmount.toLocaleString("vi-VN")} VNĐ
+          </td>
+          <td>
+            <span
+              style={{
+                padding: "5px 10px",
+                borderRadius: "10px",
+                fontSize: "12px",
+                fontWeight: "bold",
+                backgroundColor:
+                  item.status === "PENDING"
+                    ? "#fff3e0"
+                    : item.status === "PROCESSING"
+                      ? "#fff3e0"
+                      : item.status === "SHIPPED"
+                        ? "#e3f2fd"
+                        : item.status === "COMPLETED"
+                          ? "#e6f4ea"
+                          : "#ffebee",
+                color:
+                  item.status === "PENDING"
+                    ? "#f57c00"
+                    : item.status === "PROCESSING"
+                      ? "#f57c00"
+                      : item.status === "SHIPPED"
+                        ? "#0288d1"
+                        : item.status === "COMPLETED"
+                          ? "#1e8e3e"
+                          : "#d32f2f",
+              }}
+            >
+              {item.status}
+            </span>
+          </td>
         </tr>
       );
     });
@@ -104,6 +154,7 @@ class CustomerComponent extends Component {
             textAlign: "center",
             marginBottom: "20px",
             textTransform: "uppercase",
+            fontWeight: "800",
           }}
         >
           QUẢN LÝ KHÁCH HÀNG
@@ -154,10 +205,11 @@ class CustomerComponent extends Component {
                 borderLeft: "5px solid #d32f2f",
                 paddingLeft: "10px",
                 marginBottom: "15px",
+                textTransform: "uppercase",
               }}
             >
               ĐƠN HÀNG CỦA:{" "}
-              <span style={{ color: "#d32f2f" }}>
+              <span style={{ color: "#d32f2f", fontWeight: "bold" }}>
                 {this.state.customer.name}
               </span>
             </h3>
@@ -193,9 +245,14 @@ class CustomerComponent extends Component {
                   <tr>
                     <td
                       colSpan="5"
-                      style={{ textAlign: "center", padding: "20px" }}
+                      style={{
+                        textAlign: "center",
+                        padding: "30px",
+                        color: "#888",
+                        fontStyle: "italic",
+                      }}
                     >
-                      Khách hàng này chưa có đơn hàng nào
+                      Khách hàng này chưa có đơn hàng nào!
                     </td>
                   </tr>
                 )}
